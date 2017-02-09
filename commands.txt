@@ -1,0 +1,2 @@
+cat nav.igc | grep -o B.............N............... | python findDiff.py > res.txt
+
