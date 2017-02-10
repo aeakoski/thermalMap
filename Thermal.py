@@ -12,19 +12,28 @@ class Thermal(object):
         self.enter = 0
 
     def addDataPoint(self, dataPoint):
-        if self.enter == 0:
-            self.enter = int(dataPoint[2])
         if self.top < int(dataPoint[2]):
             self.top = int(dataPoint[2])
 
+        if self.enter == 0:
+            self.enter = int(dataPoint[2])
+        else:
+            pTemp = (float(dataPoint[2])/float(dataPoint[3]))
+            if 0 < pTemp:
+                self.powersum+=(float(dataPoint[2])/float(dataPoint[3]))
         self.dataList.append(dataPoint)
-        self.powersum+=(float(dataPoint[2])/float(dataPoint[3]))
+
 
     def getGroundCenter(self):
         #Calculate GC
         pass
+        
     def getPower(self):
-        return self.powersum/len(self.dataList)
+        try:
+            p = self.powersum/(len(self.dataList)-1)
+        except ZeroDivisionError:
+            p = 0
+        return p
 
     def getClimb(self):
         return self.top-self.enter
