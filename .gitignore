@@ -2,3 +2,4 @@
 *.IGC
 res.txt
 igcfiles/
+*.pyc
