@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from mpl_toolkits.basemap import Basemap
 import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
 import numpy as np
 import csv
 import sys
@@ -13,6 +14,7 @@ hardThermals = []
 veryHardThermals = []
 extremeThermals = []
 onceInALifeTimeThermals = []
+thermals = []
 
 def getCoords():
     ifile = open('res.txt', "rb")
@@ -20,8 +22,6 @@ def getCoords():
     longitude = []
     latitude = []
     altitude = []
-
-    thermals = []
 
     first = True
     rowCount = 0
@@ -50,7 +50,10 @@ def getCoords():
         '''
         #Sortera in termikblåsorna i kategorierr efter styrka
         if not sameThermal: #Om vi inte är i samma blåsa som tidigare, skapa en ny blåsa! men innan det, spara den gammla blåsan i rätt lista
+
             if len(thermals) == 0:
+                pass
+            elif thermals[-1].getNumberOfDataPoints() < 3:
                 pass
             elif thermals[-1].getPower() < 1:
                 weakThermals.append(thermals[-1])
@@ -72,10 +75,14 @@ def getCoords():
         longitude.append(float(row[1]))
         latitude.append(float(row[0]))
 
+        c = 0
     for i in thermals:
-        print(str(i.getPower())+", "+ str(i.getClimb())+", "+ str(i.getDiameter())+", "+ str(i.getNumberOfDataPoints()))
-    print(len(thermals))
-    print(rowCount)
+        i.calculateData()
+        if(20 < i.getClimb()):
+            print(str(c)+", "+str(i.getPower())+", "+ str(i.getClimb())+", "+ str(i.getDiameter())+", "+ str(i.getSpeed())+", "+ str(i.getNumberOfDataPoints()))
+        c+=1
+    print("Antal vindar: " + str(len(thermals)))
+    print("Totala datapunkter: " + str(rowCount))
 
     ifile.close()
     return longitude, latitude
@@ -95,13 +102,16 @@ def main():
     fig = plt.gcf()
     fig.set_size_inches(width, height);
 
+    #fig = plt.figure()
+    #ax = fig.add_subplot(111, projection='3d')
+
+
     # The default DPI setting is 96, we're just specifying it here
     # to use it for calculating the number of x-axis pixels to request.
     dpi = 96
     xpixels = dpi * width
-    lon, lat = getCoords()
-
-    x,y = map(lon, lat)
+    lon, lat = getCoords() ##Create all the thermals
+    #x,y = map(lon, lat)
     print("Klar med omvandlingen!")
 
     color1 = '#FFDCAC' #Beige typ
@@ -110,11 +120,49 @@ def main():
     color4 = '#E42F27' #Röd
     color5 = '#BF0118' # Vinröd
 
+    #nr = int(input("Pick a thermal to plot: "))
+    #xx, yy, alt = thermals[nr].getPlotData()
+    #print(xx)
+    #print(yy)
+    #ax.scatter(yy, xx, alt, c = color4, marker = 'o')
+
 
     plt.gcf().set_size_inches(width, height)
     map.arcgisimage(service='Canvas/World_Light_Gray_Base', xpixels=xpixels)
-    map.scatter(x, y, color=color4, alpha=0.005, marker='o', s=100, linewidths = 0)
 
+    print("Nedladdning klar!")
+
+    for t in weakThermals:
+        xt,yt = t.getGroundCenter()
+        print(xt,yt)
+        x,y = map(xt, yt)
+        map.scatter(x, y, color=color1, alpha=0.001, marker='o', s=100, linewidths = 0)
+    print("1 klar!")
+    for t in mediumThermals:
+        xt,yt = t.getGroundCenter()
+        x,y = map(xt, yt)
+        map.scatter(x, y, color=color2, alpha=0.02, marker='o', s=100, linewidths = 0)
+    print("2 klar!")
+    for t in hardThermals:
+        xt,yt = t.getGroundCenter()
+        x,y = map(xt, yt)
+        map.scatter(x, y, color=color3, alpha=0.03, marker='o', s=100, linewidths = 0)
+    print("3 klar!")
+    for t in veryHardThermals:
+        xt,yt = t.getGroundCenter()
+        x,y = map(xt, yt)
+        map.scatter(x, y, color=color4, alpha=0.04, marker='o', s=100, linewidths = 0)
+    print("4 klar!")
+    for t in extremeThermals:
+        xt,yt = t.getGroundCenter()
+        x,y = map(xt, yt)
+        map.scatter(x, y, color=color5, alpha=0.05, marker='o', s=100, linewidths = 0)
+    print("5 klar!")
+    for t in onceInALifeTimeThermals:
+        xt,yt = t.getGroundCenter()
+        x,y = map(xt, yt)
+        map.scatter(x, y, color=color5, alpha=0.05, marker='o', s=100, linewidths = 0)
+    print("6 klar!")
 
 
     plt.show()
