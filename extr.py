@@ -3,7 +3,9 @@
 
 """
 
-ls igcfiles | grep ".igc" -i | python extr.py
+ls igcfiles | grep ".igc" -i | python extr.py |python tMap.py
+
+sudo /etc/init.d/elasticsearch start
 
 Nästa steg, anv. Linjär algebra för en linje i 3d och hitta vart den skär z = 0, dvs jordytan.
 Gör detta då termikblåsan har en höjdvinst på typ över 100-200 meter. Om ett för lågt värde tas kan apoximationen bli helt kaiko!
@@ -14,6 +16,7 @@ import itertools
 import os
 import sys
 import math
+import json
 
 import igc_lib
 
@@ -49,9 +52,12 @@ def main():
                     x, y, z = findThermalOnGround(t.enter_fix.lon, t.enter_fix.lat, t.enter_fix.gnss_alt, t.exit_fix.lon, t.exit_fix.lat, t.exit_fix.gnss_alt)
                 else:
                     x, y = approxThermal(t.enter_fix.lon, t.enter_fix.lat, t.exit_fix.lon, t.exit_fix.lat)
-                    pass
+
                 if t.vertical_velocity() > 0:
-                    print str(x) + ", " + str(y) + ", " + str(t.vertical_velocity())
+                    print "{\"index\":{}}"
+                    print json.dumps({ "type" : "Feature" , "properties" : {"velocity":t.vertical_velocity()}, "geometry":{"type":"Point", "coordinates": [x, y]}})
+                    ##print json.dumps({"lon": x, "lat": y, "vel": t.vertical_velocity()})
+                    #print str(x) + ", " + str(y) + ", " + str(t.vertical_velocity())
 
 
             #print input_file + " " + str(len(flight.thermals))

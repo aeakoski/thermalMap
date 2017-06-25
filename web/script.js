@@ -6,87 +6,95 @@ var map = new mapboxgl.Map({
     zoom: 11
 });
 
-map.on('load', function() {
+var makeColor = function(num){
+  return "rgba("+num+",0,0,1)"
+}
 
-    // Add a new source from our GeoJSON data and set the
-    // 'cluster' option to true.
-    map.addSource("thermals", {
-        type: "geojson",
-        // Point to GeoJSON data. This example visualizes all M1.0+ earthquakes
-        // from 12/22/15 to 1/21/16 as logged by USGS' Earthquake hazards program.
-        data: geojson,
-        cluster: true,
-        clusterMaxZoom: 15, // Max zoom to cluster points on
-        clusterRadius: 20 // Use small cluster radius for the heatmap look
-    });
+ll = [
+    [0, 0],
+    [1, 15],
+    [2, 40],
+    [3, 61]
+]
 
-    // Use the earthquakes source to create four layers:
-    // three for each cluster category, and one for unclustered points
+var addPointsToMap = function(jsonThermals){
+  map.on('load', function(e) {
+      // Add a new source from our GeoJSON data and set the
+      // 'cluster' option to true.
+      map.addSource("thermals", {
+          type: "geojson",
+          data: jsonThermals,
+          cluster: true,
+          clusterMaxZoom: 9, // Max zoom to cluster points on
+          clusterRadius: 19 // Use small cluster radius for the heatmap look
+      });
 
-    // Each point range gets a different fill color.
-    var layers = [
-        [1, 'green'],
-        [2, 'orange'],
-        [3, 'red']
-    ];
 
-    layers.forEach(function (layer, i) {
-        map.addLayer({
-            "id": "cluster-" + i,
-            "type": "circle",
-            "source": "thermals",
-            "paint": {
-                "circle-color": layer[1],
-                "circle-radius": 20,
-                "circle-blur": 1 // blur the circles to get a heatmap look
-            },
-            "filter": i === layers.length - 1 ? //Filter the datapoints
-                [">=", "velocity", layer[0]] :
-                [
-                  "all",
-                  [">=", "velocity", layer[0]],
-                  ["<", "velocity", layers[i + 1][0]]
-                ]
-        }, 'waterway-label');
-    });
+      map.addLayer({
+          "id": "cluster-1",
+          "type": "circle",
+          "source": "thermals",
 
-    map.addLayer({
-        "id": "unclustered-points",
-        "type": "circle",
-        "source": "thermals",
-        "paint": {
-            "circle-color": 'rgba(0,255,0,0.5)',
-            "circle-radius": 20,
-            "circle-blur": 1
-        },
-        "filter": ["<", "velocity", 1]
-    }, 'waterway-label');
+          "paint": {
+              "circle-color": 'rgba(100,0,0,0.1)',
+              "circle-radius": {
+                property: "velocity",
+                type: "exponential",
+                stops: ll
+              },
+              "circle-blur": 1 // blur the circles to get a heatmap look
+          },
+          "filter": ["<","velocity", 1]
+          //"filter": ["all",["==", "cluster", true],]
+      }, 'waterway-label');
+
+
+      map.addLayer({
+          "id": "cluster-2",
+          "type": "circle",
+          "source": "thermals",
+
+          "paint": {
+              "circle-color": 'rgba(200,0,0,0.5)',
+              "circle-radius": {
+                property: "velocity",
+                type: "exponential",
+                stops: ll
+              },
+              "circle-blur": 1 // blur the circles to get a heatmap look
+          },
+          "filter": [">","velocity", 1]
+          //"filter": ["all",["==", "cluster", true],]
+      }, 'waterway-label');
+
+  });
+}
+
+var data = JSON.stringify({
+"size": 1000,
+  "query": {
+    "match_all": {}
+  }
 });
 
-var geojson = {
-    "type": "FeatureCollection",
-    "crs": {
-      "type": "name",
-      "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" }
-      },
-    "features": [
-      {
-        "type":"Feature",
-        "properties":{"velocity":1.001},
-        "geometry":{"type":"Point", "coordinates": [17.238713661202187, 59.079036612021866]}
+var xhr = new XMLHttpRequest();
 
-      },
-      {
-        "type":"Feature",
-        "properties":{"velocity":2.001},
-        "geometry":{"type":"Point", "coordinates": [17.22938333333333, 59.07901666666667]}
+xhr.addEventListener("readystatechange", function () {
+  if (this.readyState === 4) {
 
-      },
-      {
-        "type":"Feature",
-        "properties":{"velocity":3.001},
-        "geometry":{"type":"Point", "coordinates": [17.12874166666667, 59.05651666666667]}
+    JSON.parse(this.responseText).hits.hits.forEach(function(element){
+      geojson.features.push(element._source);
+    });
+    addPointsToMap(geojson);
+    ////gör ett geojson object av svaret
+    //måla upp detta geojson på kartan med funktionen ovan
+  }
+});
 
-      }
-    ]
-}
+xhr.open("POST", "http://127.0.0.1:9200/thermals/ground/_search");
+//Fix denna at prata med elastic genom att inte skicka med några headders alls! Nu skrivs svaret ut i konsollen!
+//observera att denna skaköras med "http-server ."
+xhr.send(data);
+
+
+var geojson = { "features": [] }
