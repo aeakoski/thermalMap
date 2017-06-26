@@ -6,6 +6,8 @@ var map = new mapboxgl.Map({
     zoom: 11
 });
 
+map.dragRotate.disable(); //Disables rotation
+
 var makeColor = function(num){
   return "rgba("+num+",0,0,1)"
 }
@@ -17,10 +19,20 @@ ll = [
     [3, 61]
 ]
 
+map.on('moveend', function(e){
+  lonlat = map.getBounds();
+  upperLat = lonlat._ne.lat;
+  lowerLat = lonlat._sw.lat;
+
+  lowerLon = lonlat._sw.lon;
+  upperLat = lonlat._ne.lon;
+  console.log(lonlat);
+});
+
 var addPointsToMap = function(jsonThermals){
   map.on('load', function(e) {
-      // Add a new source from our GeoJSON data and set the
-      // 'cluster' option to true.
+
+      console.log("Tooleloo");
       map.addSource("thermals", {
           type: "geojson",
           data: jsonThermals,
@@ -85,6 +97,9 @@ xhr.addEventListener("readystatechange", function () {
       geojson.features.push(element._source);
     });
     addPointsToMap(geojson);
+    map.on("ready", function(e){
+      console.log("Ready");
+    });
     ////gör ett geojson object av svaret
     //måla upp detta geojson på kartan med funktionen ovan
   }
