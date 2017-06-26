@@ -78,10 +78,9 @@ var data = JSON.stringify({
 });
 
 var xhr = new XMLHttpRequest();
-
 xhr.addEventListener("readystatechange", function () {
   if (this.readyState === 4) {
-
+    //console.log(this.responseText);
     JSON.parse(this.responseText).hits.hits.forEach(function(element){
       geojson.features.push(element._source);
     });
@@ -91,9 +90,7 @@ xhr.addEventListener("readystatechange", function () {
   }
 });
 
-xhr.open("POST", "http://127.0.0.1:9200/thermals/ground/_search");
-//Fix denna at prata med elastic genom att inte skicka med några headders alls! Nu skrivs svaret ut i konsollen!
-//observera att denna skaköras med "http-server ."
+xhr.open("POST", "http://192.168.1.6:9200/thermals/ground/_search");
 xhr.send(data);
 
 
