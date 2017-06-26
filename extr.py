@@ -98,6 +98,7 @@ def main():
     print "Uploading the last " + str(counter_for_bulk_upload) + " flights-worth to Elastic..."
     failedUploads += uploadThermalsToElastic(bulkReq)
     print "Fetched total " + str(downloads) + " IGC files from RST"
+    print "Failed to extract thermals from " + str(error_flights) + " flights"
     print "Failed to upload " + str(failedUploads) + " packages to Elasticsearch"
 
     print "Klaar MFS!!!"
