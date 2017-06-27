@@ -38,10 +38,11 @@ def approxThermal(x1, y1, x2, y2):
     return ((x2-x1)/2) + x1, ((y2-y1)/2) + y1
 
 def uploadThermalsToElastic(body):
-    url = "http://127.0.0.1:9200/thermals/ground/_bulk"
+    url = "http://127.0.0.1:9200/map/thermals/_bulk"
     response = requests.request("POST", url, data = body)
     jsonRes = json.loads(response.text)
     if jsonRes['errors']:
+        print "Error in upload! :O"
         return 1
     return 0
 
@@ -85,7 +86,8 @@ def main():
 
             if 0 < t.vertical_velocity():
                 bulkReq = bulkReq + "{\"index\":{}}\n"
-                bulkReq = bulkReq + "{ \"type\" : \"Feature\" , \"properties\" : {\"velocity\":"+ str(t.vertical_velocity()) + "}, \"geometry\":{\"type\":\"Point\", \"coordinates\": [" + str(x) + ", " + str(y) + "]}}\n"
+                bulkReq = bulkReq + "{ \"type\" : \"Feature\" , \"properties\" : {\"velocity\":"+ str(t.vertical_velocity()) + ", \"pilot\": \"stefan björnstam\"}, \"geometry\":{\"type\":\"Point\", \"coordinates\": [ " + str(x) + ", " + str(y) + " ]}}\n"
+                #Atom slutar med syntax highlight på långa strängar...
 
                 #print "{\"index\":{}}"
                 #print json.dumps({ "type" : "Feature" , "properties" : {"velocity":t.vertical_velocity()}, "geometry":{"type":"Point", "coordinates": [x, y]}})

@@ -1,7 +1,8 @@
 
  #navbar ul {
 	margin: 0;
-	padding: 5px;
+  margin-top:1em;
+	padding: 1em;
 	list-style-type: none;
 	text-align: center;
 	background-color: #000;

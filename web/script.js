@@ -2,14 +2,49 @@ mapboxgl.accessToken = 'pk.eyJ1IjoiYWVha29za2kiLCJhIjoiY2o0YWZranltMTJtZzMzcGc3N
 var map = new mapboxgl.Map({
     container: 'map',
     style: 'mapbox://styles/aeakoski/cj4bd0ycx4cgx2sptdzigrgtl',
-    center: [17.211814, 59.101584],
+    center: [17.211814, 59.101584], //Vängsö
     zoom: 11
 });
 
-map.dragRotate.disable(); //Disables rotation
+var sendRequest = function(){
+  lonlat = map.getBounds();
+  upperLat = lonlat._ne.lat;
+  lowerLat = lonlat._sw.lat;
 
-var makeColor = function(num){
-  return "rgba("+num+",0,0,1)"
+  lowerLon = lonlat._sw.lng;
+  upperLon = lonlat._ne.lng;
+/*
+
+geometry:
+  coordinates[16.9276178019, 59.1125291022]
+properties:
+  lat : 59.1125291022
+  lon : 16.9276178019
+  pilot : "stefan björnstam"
+  velocity : 2.40151515152
+
+*/
+  var data = JSON.stringify({
+    "size":1000,
+    "query": {
+      "geo_bounding_box": {
+        "geometry.coordinates": {
+          "top_left": {
+            "lat": upperLat,
+            "lon": lowerLon
+          },
+          "bottom_right": {
+            "lat": lowerLat,
+            "lon": upperLon
+          }
+        }
+      }
+    }
+  }
+);
+
+  xhr.open("POST", "http://127.0.0.1:9200/map/thermals/_search");
+  xhr.send(data);
 }
 
 ll = [
@@ -19,20 +54,11 @@ ll = [
     [3, 61]
 ]
 
-map.on('moveend', function(e){
-  lonlat = map.getBounds();
-  upperLat = lonlat._ne.lat;
-  lowerLat = lonlat._sw.lat;
-
-  lowerLon = lonlat._sw.lon;
-  upperLat = lonlat._ne.lon;
-  console.log(lonlat);
-});
+map.on('moveend', sendRequest);
+map.on('load', sendRequest)
+map.dragRotate.disable(); //Disables rotation
 
 var addPointsToMap = function(jsonThermals){
-  map.on('load', function(e) {
-
-      console.log("Tooleloo");
       map.addSource("thermals", {
           type: "geojson",
           data: jsonThermals,
@@ -79,34 +105,29 @@ var addPointsToMap = function(jsonThermals){
           //"filter": ["all",["==", "cluster", true],]
       }, 'waterway-label');
 
-  });
-}
 
-var data = JSON.stringify({
-"size": 1000,
-  "query": {
-    "match_all": {}
-  }
-});
+}
 
 var xhr = new XMLHttpRequest();
 xhr.addEventListener("readystatechange", function () {
+  //Add 404 error handeling
   if (this.readyState === 4) {
-    //console.log(this.responseText);
+    if (map.getSource("thermals")) {
+      map.removeLayer("cluster-1");
+      map.removeLayer("cluster-2");
+      map.removeSource("thermals");
+    }
+    let geolist = []
+
+    var first = true;
     JSON.parse(this.responseText).hits.hits.forEach(function(element){
-      geojson.features.push(element._source);
+      if (first) {
+        //console.log(element._source);
+        first = false;
+      }
+      geolist.push(element._source);
     });
-    addPointsToMap(geojson);
-    map.on("ready", function(e){
-      console.log("Ready");
-    });
-    ////gör ett geojson object av svaret
-    //måla upp detta geojson på kartan med funktionen ovan
+
+    addPointsToMap({"features": geolist});
   }
 });
-
-xhr.open("POST", "http://192.168.1.6:9200/thermals/ground/_search");
-xhr.send(data);
-
-
-var geojson = { "features": [] }
