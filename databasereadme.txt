@@ -18,11 +18,14 @@ Create a template for a thermal to make it searchable by rane and other stuff
 PUT - http://127.0.0.1:9200/map/_mapping/thermals
 
 {
-  "thermal":{
+  "thermals":{
     "properties":{
       "properties":{
     	"properties":{
-	        "pilot":{"type":"string"},
+	        "pilot":{
+            "type":"string",
+            "index": "not_analyzed"
+            },
 	        "velocity":{"type":"float"}
     	}
       },
@@ -51,37 +54,47 @@ properties:
 GET - http://127.0.0.1:9200/map/thermal
 
 {
-"size": 1000,
-  "query": {
-    "range" : {
-            "properties.lat" : {
-                "gte" : 59,
-                "lte" : 60,
-            },
-            "properties.lon" : {
-                "gte" : 16,
-                "lte" : 17,
-            }
-
-      },
-    "match_all": {}
-  }
-}
-
-{
-  "size":1000,
-  "query": {
-    "geo_bounding_box": {
-      "geometry.coordinates": {
-        "top_left": {
-          "lat": 60,
-          "lon": 16
-        },
-        "bottom_right": {
-          "lat": 59,
-          "lon": 17
-        }
-      }
-    }
-  }
+	"size":1000,
+	"query":{
+		"bool":{
+			"must":[
+				{
+					"geo_bounding_box":{
+						"geometry.coordinates":{
+							"top_left":{
+								"lat":59.17933313944678,
+								"lon":17.055430485580473
+							},
+							"bottom_right":{
+								"lat":59.023658164668234,
+								"lon":17.36819751438449
+							}
+						}
+					}
+				},
+				{
+					"bool":{
+						"should":[
+							{
+								"match": {
+						        	"properties.pilot" : {
+						        	"query" : "stefan björnstam",
+						        	"operator" : "and"
+						        	}
+								}
+							},
+							{
+								"match": {
+						        	"properties.pilot" : {
+						        	"query" : "koski",
+						        	"operator" : "and"
+						        	}
+								}
+							}
+						]
+					}
+				}
+			]
+		}		
+	}
 }

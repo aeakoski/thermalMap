@@ -6,43 +6,77 @@ var map = new mapboxgl.Map({
     zoom: 11
 });
 
-var sendRequest = function(){
+pilotFilter = [];
+clubFilter = [];
+
+var listToString = function(list){
+  if (list.length ==0) {
+    return "[]"
+  }
+  let string = "[ "
+  list.forEach(function(e){
+    string = string + "\"" + e +"\", "
+  })
+  return string.slice(0, -2)+"]";
+}
+
+var generateRequest = function(){
   lonlat = map.getBounds();
   upperLat = lonlat._ne.lat;
   lowerLat = lonlat._sw.lat;
 
   lowerLon = lonlat._sw.lng;
   upperLon = lonlat._ne.lng;
-/*
 
-geometry:
-  coordinates[16.9276178019, 59.1125291022]
-properties:
-  lat : 59.1125291022
-  lon : 16.9276178019
-  pilot : "stefan björnstam"
-  velocity : 2.40151515152
+  var request = {
+	"size":1000,
+	"query":{
+		"bool":{
+			"must":[
+				{
+					"geo_bounding_box":{
+						"geometry.coordinates":{
+							"top_left":{
+								"lat":upperLat,
+								"lon":lowerLon
+							},
+							"bottom_right":{
+								"lat":lowerLat,
+								"lon":upperLon
+							}
+						}
+					}
+				},
+				{
+					"bool":{
+						"should":[]
+					}
+				}
+			]
+		}
 
-*/
-  var data = JSON.stringify({
-    "size":1000,
-    "query": {
-      "geo_bounding_box": {
-        "geometry.coordinates": {
-          "top_left": {
-            "lat": upperLat,
-            "lon": lowerLon
-          },
-          "bottom_right": {
-            "lat": lowerLat,
-            "lon": upperLon
-          }
-        }
+	}
+
+}
+
+  pilotFilter.forEach(function(pilot){
+    request.query.bool.must[1].bool.should.push({
+      "match": {
+            "properties.pilot" : {
+            "query" : pilot,
+            "operator" : "and"
+            }
       }
-    }
-  }
-);
+    });
+  })
 
+
+  return JSON.stringify(request);
+
+}
+
+var sendRequest = function(){
+  data = generateRequest();
   xhr.open("POST", "http://127.0.0.1:9200/map/thermals/_search");
   xhr.send(data);
 }
@@ -135,3 +169,51 @@ xhr.addEventListener("readystatechange", function () {
     addPointsToMap({"features": geolist});
   }
 });
+
+
+var addPilot = function(e, pilot){
+  if (e.charCode == 13 && pilot != "") {
+    //TODO errorhantering vid input
+    //Maxlängd
+        //bara alfabetiska chars
+    //om samma filter redan existerar, lägg inte till det!
+    if (/^[a-zåäö\ ]+$/i.test(pilot) && pilot.length < 40 && pilotFilter.indexOf(pilot) == -1) {
+      console.log("Pushat!");
+        pilotFilter.push(pilot);
+        //skicka en ny request med pilot som querry
+        sendRequest();
+        displayFilters();
+        event.currentTarget.value = "";
+
+    }
+
+
+
+
+  }
+
+}
+var addClub = function(e, club){} //TODO
+
+
+var displayFilters = function () {
+    var filters = document.getElementById('filter-results');
+    filters.innerHTML = "";
+    pilotFilter.forEach(function(filter){
+        filters.innerHTML = filters.innerHTML + "\n"+
+        "<div class=\"filter-tag\">\
+          <p>" + filter+ "</p><i class=\"fa fa-times\" aria-hidden=\"true\" onclick=\"removeFilter(filter)\"></i>\
+        </div>"
+
+    });
+
+    clubFilter.forEach(function(filter){
+        filters.innerHTML = filters.innerHTML + "\n"+
+        "<div class=\"filter-tag\">\
+          <p>" + filter + "</p><i class=\"fa fa-times\" aria-hidden=\"true\" onclick=\"removeFilter(filter)\"></i>\
+        </div>"
+
+    })
+
+
+}
