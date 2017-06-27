@@ -59,6 +59,14 @@ map.on('load', sendRequest)
 map.dragRotate.disable(); //Disables rotation
 
 var addPointsToMap = function(jsonThermals){
+      if (map.getSource("thermals")) {
+        map.removeLayer("cluster-1");
+        map.removeLayer("cluster-2");
+        map.removeSource("thermals");
+      }
+
+      document.getElementById('nrt').innerHTML = "<i class=\"fa fa-cloud\" aria-hidden=\"true\"></i>: "+jsonThermals.features.length;
+
       map.addSource("thermals", {
           type: "geojson",
           data: jsonThermals,
@@ -112,11 +120,7 @@ var xhr = new XMLHttpRequest();
 xhr.addEventListener("readystatechange", function () {
   //Add 404 error handeling
   if (this.readyState === 4) {
-    if (map.getSource("thermals")) {
-      map.removeLayer("cluster-1");
-      map.removeLayer("cluster-2");
-      map.removeSource("thermals");
-    }
+
     let geolist = []
 
     var first = true;

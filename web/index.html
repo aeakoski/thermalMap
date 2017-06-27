@@ -8,16 +8,26 @@
     <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.38.0/mapbox-gl.css' rel='stylesheet' />
     <script src="https://unpkg.com/supercluster@2.3.0/dist/supercluster.min.js"></script>
 
+    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=PT+Sans" rel="stylesheet">
+
     <link href='./style.css' rel='stylesheet' />
 
     </head>
 <body>
   <div id="navbar">
-  <ul>
-	<li><a href="#">Kartan</a></li>
-	<li><a href="./info.html">Info</a></li>
-  </ul>
-</div>
+  	<div class="navelement" id="active"><a href="#">Kartan</a></div>
+    <div class="navelement"><a href="./info.html">Info</a></div>
+
+  </div>
+  <div class="filterbar">
+    <div class="search filterelement">
+      <i class="fa fa-search" aria-hidden="true"></i><input type="text" name="pilot" value="">
+    </div>
+    <div class ="filterelement" id="nrt"><i class="fa fa-cloud" aria-hidden="true"></i>: 0</div>
+
+
+  </div>
 
 <div id='map'></div>
 
