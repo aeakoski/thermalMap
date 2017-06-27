@@ -3,7 +3,9 @@ var map = new mapboxgl.Map({
     container: 'map',
     style: 'mapbox://styles/aeakoski/cj4bd0ycx4cgx2sptdzigrgtl',
     center: [17.211814, 59.101584], //Vängsö
-    zoom: 11
+    zoom: 11,
+    maxZoom:12,
+    minZoom:8
 });
 
 pilotFilter = [];
