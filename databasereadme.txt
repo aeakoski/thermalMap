@@ -23,8 +23,10 @@ PUT - http://127.0.0.1:9200/map/_mapping/thermals
       "properties":{
     	"properties":{
 	        "pilot":{
-            "type":"string",
-            "index": "not_analyzed"
+            	"type":"string"
+            },
+        	"club":{
+            	"type":"string"
             },
 	        "velocity":{"type":"float"}
     	}
@@ -95,6 +97,6 @@ GET - http://127.0.0.1:9200/map/thermal
 					}
 				}
 			]
-		}		
+		}
 	}
 }

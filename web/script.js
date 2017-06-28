@@ -53,6 +53,11 @@ var generateRequest = function(){
 					"bool":{
 						"should":[]
 					}
+				},
+        {
+					"bool":{
+						"should":[]
+					}
 				}
 			]
 		}
@@ -66,6 +71,17 @@ var generateRequest = function(){
       "match": {
             "properties.pilot" : {
             "query" : pilot,
+            "operator" : "and"
+            }
+      }
+    });
+  })
+
+  clubFilter.forEach(function(club){
+    request.query.bool.must[2].bool.should.push({
+      "match": {
+            "properties.club" : {
+            "query" : club,
             "operator" : "and"
             }
       }
@@ -172,30 +188,29 @@ xhr.addEventListener("readystatechange", function () {
   }
 });
 
+var checkUserInput = function(inp){
+  if ((/^[a-zåäö\ ]+$/i.test(inp)) && (inp !== "") && (inp.length < 40)) { return true; }
+  return false;
+}
 
-var addPilot = function(e, pilot){
-  if (e.charCode == 13 && pilot != "") {
-    //TODO errorhantering vid input
-    //Maxlängd
-        //bara alfabetiska chars
-    //om samma filter redan existerar, lägg inte till det!
-    if (/^[a-zåäö\ ]+$/i.test(pilot) && pilot.length < 40 && pilotFilter.indexOf(pilot) == -1) {
-      console.log("Pushat!");
-        pilotFilter.push(pilot);
-        //skicka en ny request med pilot som querry
-        sendRequest();
-        displayFilters();
-        event.currentTarget.value = "";
+var addFilter = function(e, userInput, type){
+  if (e.charCode != 13){ return; }
+  if(!checkUserInput(userInput)){ return; }
 
-    }
-
-
-
-
-  }
+  if (type === "pilot") {
+  
+    if (pilotFilter.indexOf(userInput) != -1) { return; }
+    pilotFilter.push(userInput);
+  }else if (type === "club"){
+    if (clubFilter.indexOf(userInput) != -1) { return; }
+    clubFilter.push(userInput);
+  }else{ return; }
+  sendRequest();
+  displayFilters();
+  event.currentTarget.value = "";
 
 }
-var addClub = function(e, club){} //TODO
+
 
 
 var displayFilters = function () {

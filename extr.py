@@ -18,6 +18,7 @@ import sys
 import math
 import json
 import requests
+from lxml import html
 import urllib2
 import re
 
@@ -42,6 +43,7 @@ def uploadThermalsToElastic(body):
     response = requests.request("POST", url, data = body)
     jsonRes = json.loads(response.text)
     if jsonRes['errors']:
+        print jsonRes
         print "Error in upload! :O"
         return 1
     return 0
@@ -53,11 +55,18 @@ def main():
     data = web.read()
     web.close()
 
+    tree = html.fromstring(data)
+
+    igc_download_list = tree.xpath("//tbody/tr/td/a[@title= 'Ladda ner IGC-fil']/@href")
+    club_list = tree.xpath("//tbody/tr/td/a[@title= 'Visa klubbens samtliga resultat']/text()")
+    pilot_list = tree.xpath("//tbody/tr/td/a[contains(@title, 'ttningens samtliga resultat')]/text()")
+
     downloads = 0
     failedUploads = 0
     counter_for_bulk_upload = 0
     error_flights = 0
-    for i in re.findall('href=\"downloadIgc\.php\?id=[0-9]*\"', data):
+
+    for i in igc_download_list:
 
         if counter_for_bulk_upload == 5:
             print "Uploading " + str(counter_for_bulk_upload) + " flights-worth to Elastic..."
@@ -65,8 +74,7 @@ def main():
             bulkReq = ""
             counter_for_bulk_upload = 0
 
-        igcURL = "http://www.rst-online.se/" + i[6:len(i)-1] ##Link address to igc file
-
+        igcURL = "http://www.rst-online.se/" + i ##Link address to igc file
         response = urllib2.urlopen(igcURL)
 
         flight = igc_lib.Flight.create_from_str(response.read())
@@ -86,7 +94,7 @@ def main():
 
             if 0 < t.vertical_velocity():
                 bulkReq = bulkReq + "{\"index\":{}}\n"
-                bulkReq = bulkReq + "{ \"type\" : \"Feature\" , \"properties\" : {\"velocity\":"+ str(t.vertical_velocity()) + ", \"pilot\": \"stefan björnstam\"}, \"geometry\":{\"type\":\"Point\", \"coordinates\": [ " + str(x) + ", " + str(y) + " ]}}\n"
+                bulkReq = bulkReq + "{ \"type\" : \"Feature\" , \"properties\" : {\"velocity\":"+ str(t.vertical_velocity()) + ", \"pilot\": \"" + pilot_list[downloads].encode('utf8') + "\", \"club\": \"" + club_list[downloads].encode('utf8') + "\"}, \"geometry\":{\"type\":\"Point\", \"coordinates\": [ " + str(x) + ", " + str(y) + " ]}}\n"
                 #Atom slutar med syntax highlight på långa strängar...
 
                 #print "{\"index\":{}}"
@@ -94,14 +102,13 @@ def main():
 
         downloads +=1
         counter_for_bulk_upload +=1
-        if downloads % 10 == 0:
-            print downloads
+        print downloads
 
     print "Uploading the last " + str(counter_for_bulk_upload) + " flights-worth to Elastic..."
     failedUploads += uploadThermalsToElastic(bulkReq)
-    print "Fetched total " + str(downloads) + " IGC files from RST"
-    print "Failed to extract thermals from " + str(error_flights) + " flights"
-    print "Failed to upload " + str(failedUploads) + " packages to Elasticsearch"
+    print str(downloads) + " - Total IGC files fetched from RST"
+    print str(error_flights) + " - Errors in extracting thermals from flights"
+    print str(failedUploads) + " - Errors in uploading packages to Elasticsearch"
 
     print "Klaar MFS!!!"
 

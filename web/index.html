@@ -24,17 +24,17 @@
 
     <div class="filter-section">
       <div class="search filter-toggle">
-        <i class="fa fa-search" aria-hidden="true"></i><input type="text" name="pilot" placeholder="Filtrera på pilot" value="" onkeypress="addPilot(event, value)">
+        <i class="fa fa-search" aria-hidden="true"></i><input type="text" name="pilot" placeholder="Filtrera på pilot" value="" onkeypress="addFilter(event, value, 'pilot')">
       </div>
       <div class="search filter-toggle">
-        <i class="fa fa-users" aria-hidden="true"></i><input type="text" name="club" placeholder="Filtrera på flygklubb" value="" onkeypress="addClub(event, club)">
+        <i class="fa fa-users" aria-hidden="true"></i><input type="text" name="club" placeholder="Filtrera på flygklubb" value="" onkeypress="addFilter(event, value, 'club')">
       </div>
       <div class ="filter-toggle" id="nrt"><i class="fa fa-cloud" aria-hidden="true"></i>: 0</div>
     </div>
 
 
     <div id="filter-results" class="filter-section">
-      
+
     </div>
 
   </div>
