@@ -19,6 +19,8 @@ import math
 import json
 import requests
 from lxml import html
+# https://stackoverflow.com/questions/2018026/what-are-the-differences-between-the-urllib-urllib2-and-requests-module
+# Ersätt urllib2 med requests. Det är mkt snabbare!!!!
 import urllib2
 import re
 
@@ -114,13 +116,22 @@ def upload_flights_from_igc_links(igc_download_list, pilot_list, club_list):
 
 
 def main():
-    igc_download_list, pilot_list, club_list = extract_data_from_url('http://www.rst-online.se/RSTmain.php?list=1&tab=0&class=1&crew=10168')
+    links = ['http://www.rst-online.se/RSTmain.php?list=1&tab=0&class=1&crew=10168',
+            'http://www.rst-online.se/RSTmain.php?list=1&tab=0&class=1&crew=10161']
+    downloads = 0
+    error_flights = 0
+    failed_uploads = 0
 
-    downloads, error_flights, failedUploads = upload_flights_from_igc_links(igc_download_list, pilot_list, club_list)
+    for link in links:
+        igc_download_list, pilot_list, club_list = extract_data_from_url(link)
+        d, e, f = upload_flights_from_igc_links(igc_download_list, pilot_list, club_list)
+        downloads += d
+        error_flights += e
+        failed_uploads += f
 
     print str(downloads) + " - Total IGC files fetched from RST"
     print str(error_flights) + " - Errors in extracting thermals from flights"
-    print str(failedUploads) + " - Errors in uploading packages to Elasticsearch"
+    print str(failed_uploads) + " - Errors in uploading packages to Elasticsearch"
 
     print "Klaar MFS!!!"
 
