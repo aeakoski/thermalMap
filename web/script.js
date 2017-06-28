@@ -198,7 +198,7 @@ var addFilter = function(e, userInput, type){
   if(!checkUserInput(userInput)){ return; }
 
   if (type === "pilot") {
-  
+
     if (pilotFilter.indexOf(userInput) != -1) { return; }
     pilotFilter.push(userInput);
   }else if (type === "club"){
@@ -211,6 +211,23 @@ var addFilter = function(e, userInput, type){
 
 }
 
+var removeFilter = function(filter, type){
+  if (type === "pilot") {
+    let index = pilotFilter.indexOf(filter);
+    if (index > -1) {
+        pilotFilter.splice(index, 1);
+    }
+  }else if(type === "club") {
+    let index = clubFilter.indexOf(filter);
+    if (index > -1) {
+        clubFilter.splice(index, 1);
+    }
+  }
+
+  sendRequest();
+  displayFilters();
+
+}
 
 
 var displayFilters = function () {
@@ -219,7 +236,7 @@ var displayFilters = function () {
     pilotFilter.forEach(function(filter){
         filters.innerHTML = filters.innerHTML + "\n"+
         "<div class=\"filter-tag\">\
-          <p>" + filter+ "</p><i class=\"fa fa-times\" aria-hidden=\"true\" onclick=\"removeFilter(filter)\"></i>\
+          <p>" + filter+ "</p><i class=\"fa fa-times\" aria-hidden=\"true\" type=\"pilot\" onclick=\"removeFilter('" + filter + "', 'pilot')\"></i>\
         </div>"
 
     });
@@ -227,7 +244,7 @@ var displayFilters = function () {
     clubFilter.forEach(function(filter){
         filters.innerHTML = filters.innerHTML + "\n"+
         "<div class=\"filter-tag\">\
-          <p>" + filter + "</p><i class=\"fa fa-times\" aria-hidden=\"true\" onclick=\"removeFilter(filter)\"></i>\
+          <p>" + filter + "</p><i class=\"fa fa-times\" aria-hidden=\"true\" onclick=\"removeFilter('" + filter + "', 'club')\"></i>\
         </div>"
 
     })
