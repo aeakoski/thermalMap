@@ -39,6 +39,8 @@ def approxThermal(x1, y1, x2, y2):
     return ((x2-x1)/2) + x1, ((y2-y1)/2) + y1
 
 def uploadThermalsToElastic(body):
+    if body == "":
+        return 0
     url = "http://127.0.0.1:9200/map/thermals/_bulk"
     response = requests.request("POST", url, data = body)
     jsonRes = json.loads(response.text)
@@ -48,10 +50,8 @@ def uploadThermalsToElastic(body):
         return 1
     return 0
 
-
-def main():
-    bulkReq = ""
-    web = urllib2.urlopen('http://www.rst-online.se/RSTmain.php?list=1&tab=0&class=1&crew=10161')
+def extract_data_from_url(url):
+    web = urllib2.urlopen(url)
     data = web.read()
     web.close()
 
@@ -61,6 +61,10 @@ def main():
     club_list = tree.xpath("//tbody/tr/td/a[@title= 'Visa klubbens samtliga resultat']/text()")
     pilot_list = tree.xpath("//tbody/tr/td/a[contains(@title, 'ttningens samtliga resultat')]/text()")
 
+    return igc_download_list, pilot_list, club_list
+
+def upload_flights_from_igc_links(igc_download_list, pilot_list, club_list):
+    bulkReq = ""
     downloads = 0
     failedUploads = 0
     counter_for_bulk_upload = 0
@@ -102,10 +106,18 @@ def main():
 
         downloads +=1
         counter_for_bulk_upload +=1
-        print downloads
-
     print "Uploading the last " + str(counter_for_bulk_upload) + " flights-worth to Elastic..."
     failedUploads += uploadThermalsToElastic(bulkReq)
+
+    return downloads, error_flights, failedUploads
+
+
+
+def main():
+    igc_download_list, pilot_list, club_list = extract_data_from_url('http://www.rst-online.se/RSTmain.php?list=1&tab=0&class=1&crew=10168')
+
+    downloads, error_flights, failedUploads = upload_flights_from_igc_links(igc_download_list, pilot_list, club_list)
+
     print str(downloads) + " - Total IGC files fetched from RST"
     print str(error_flights) + " - Errors in extracting thermals from flights"
     print str(failedUploads) + " - Errors in uploading packages to Elasticsearch"
