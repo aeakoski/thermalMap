@@ -14,7 +14,7 @@ var prev_lowerLon = 0;
 var prev_upperLon = 0;
 
 
-pilotFilter = [];
+pilotFilter = ["Stefan"];
 clubFilter = [];
 
 
@@ -198,7 +198,7 @@ xhr.addEventListener("readystatechange", function (e) {
       addPointsToMap({"features": geolist});
     } else if (this.responseURL === "http://127.0.0.1:9200/map/thermals/_count") {
       console.log(JSON.parse(this.responseText).count);
-      document.getElementById('tot-nrt').innerHTML = "/ " + JSON.parse(this.responseText).count;
+      document.getElementById('tot-nrt').innerHTML = JSON.parse(this.responseText).count;
 
 
     }else {
@@ -206,6 +206,36 @@ xhr.addEventListener("readystatechange", function (e) {
     }
   }
 });
+
+var prev_focus = 0;
+
+var changeFocus = function(type){
+
+  document.getElementsByClassName("navelement")[0].removeAttribute("id");
+  document.getElementsByClassName("navelement")[1].removeAttribute("id");
+  document.getElementsByClassName("navelement")[2].removeAttribute("id");
+
+
+  if (prev_focus == type){
+    if (type == 0){return}
+    document.getElementsByClassName("navelement")[0].setAttribute("id", "active");
+    document.getElementsByClassName("view")[type].classList.add("hide");
+    prev_focus = 0;
+    return
+
+  }else{
+      document.getElementsByClassName("navelement")[type].setAttribute("id", "active");
+  }
+
+  if (prev_focus != 0) {
+      document.getElementsByClassName("view")[prev_focus].classList.add("hide");
+  }
+  document.getElementsByClassName("view")[type].classList.remove("hide");
+  prev_focus = type;
+
+
+
+}
 
 var checkUserInput = function(inp){
   if ((/^[a-zåäö\ ]+$/i.test(inp)) && (inp !== "") && (inp.length < 40)) { return true; }
@@ -268,4 +298,5 @@ var displayFilters = function () {
 
 }
 
+displayFilters()
 sendCountRequest()

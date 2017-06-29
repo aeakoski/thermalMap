@@ -2,6 +2,8 @@
 <html>
 <head>
     <meta charset='utf-8' />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"><!--Behåller scalan på mindre devices-->
+
     <title>Termikkartan - Visar hur du ska flyga</title>
     <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
     <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.38.0/mapbox-gl.js'></script>
@@ -16,30 +18,94 @@
     </head>
 <body>
   <div id="navbar">
-  	<div class="navelement" id="active"><a href="#">Kartan</a></div>
-    <div class="navelement"><a href="./info.html">Info</a></div>
-
-  </div>
-  <div class="filterbar">
-
-    <div class="filter-section">
-      <div class="search filter-toggle">
-        <i class="fa fa-search" aria-hidden="true"></i><input type="text" name="pilot" placeholder="Filtrera på pilot" value="" onkeypress="addFilter(event, value, 'pilot')">
-      </div>
-      <div class="search filter-toggle">
-        <i class="fa fa-users" aria-hidden="true"></i><input type="text" name="club" placeholder="Filtrera på flygklubb" value="" onkeypress="addFilter(event, value, 'club')">
-      </div>
-      <div class ="filter-toggle"><i class="fa fa-cloud" aria-hidden="true"></i>: <span id="nrt">0</span> <span id = tot-nrt>/</span></div>
-    </div>
-
-
-    <div id="filter-results" class="filter-section">
-
-    </div>
+  	<div class="navelement" id = "active" onclick="changeFocus(0)"><a>Termik-kartan</a></div>
+    <div class="navelement" onclick="changeFocus(1)"><a>Info</a></div>
+    <div class="navelement" onclick="changeFocus(2)"><a>Dina flygninar</a></div>
 
   </div>
 
-<div id='map'></div>
+  <div id="map-view" class ="view">
+    <div class="filterbar">
+      <div class="filter-section">
+        <div class="search filter-toggle">
+          <i class="fa fa-search" aria-hidden="true"></i><input type="text" name="pilot" placeholder="Filtrera på pilot" value="" onkeypress="addFilter(event, value, 'pilot')">
+        </div>
+        <div class="search filter-toggle">
+          <i class="fa fa-users" aria-hidden="true"></i><input type="text" name="club" placeholder="Filtrera på flygklubb" value="" onkeypress="addFilter(event, value, 'club')">
+        </div>
+        <div class ="filter-toggle"><i class="fa fa-cloud" aria-hidden="true"></i>: <span id="nrt">0</span></div>
+      </div>
+
+      <div id="filter-results" class="filter-section"></div>
+    </div>
+
+    <div id='map'></div>
+
+  </div>
+
+  <div id="info-view" class ="view hide">
+    <div class="container">
+      <div class="col">
+        <h1>Vad är termik-kartan?</h1>
+        <p>
+          Termik-kartan är ett litet hobbyprojekt av Alexander Koski, en segelflygare/student innom datateknik. Kartan hämtar flygningar från RST, som finns öppet för alla att hämta, och på kartan visualiserar termikblåsorna från dessa flygningar. Termikblårona som visas är de där piloten har stannat upp och kurvat med en positiv höjdvinst. Större medelstig i termikblåsan ger större diameter när termikblåsan målas upp på kartan.
+        </p>
+
+        <p>
+          Tanken med kartan är att kunna hitta ställen där det "alltid" stiger, för Big-data är kul.
+        </p>
+        <div class="separator">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+      </div>
+
+      <div class="col">
+        <h1>Var kommer datan ifrån?</h1>
+        <p>
+          All data hämtas från RST-online. Varje IGC fil har analyserats och från dessa har termikblåsorna där piloten stannat upp och kurvat med positiv hödjvinst målats upp på kartan. Totalt har <span id = tot-nrt></span> termikblåsor kunnat identifierats från flygningarna som ligger upe på RST, denna siffra ökar och mer data kommer finnas tillgänglig i takt med att nya flygningarladdas upp till tävlingen.
+        </p>
+
+        <div class="separator">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+      </div>
+      <div class="col">
+        <h1>Filter</h1>
+        <p>
+          Det går att filtrera termikblåsorna som visas på kartan utefter flygklubb och utefter pilot (läs mer om att filtrera på Dina flygningar <a href="#">här</a>). Med dessa filter du kan se exakt var det är poppulärt att ligga och centrera termik jämfört med andra klubbar.
+          Genom att lägga in flera filter är det möjligt att visa flera flygklubbars termikblåsor på kartan samtidigt. Observera att du måste skriva in flygklubbens namn så som den är representerad i RST för att filtret ska träda i kraft.
+        </p>
+        <div class="separator">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+  <div id="pilot-view" class ="view hide">
+    <div class="container col-100">
+      <h1>vill du se termikblåsor från dina flygningar?</h1>
+      <p class ="ingress">
+        eller tycker termik-kartan är allmänt nice och vill visa uppskattning?
+      </p>
+      <p>
+        Det går att ordna. Om du visar din uppskattning genom att swicha motsvarande en glass (Tex en twister - 11 kr) till 0706-765 291 så drar jag i några spakar och justerar lite ventiler så får du tillbaka en hemlig kod för att kunna filtrera kartan på just dina termikblåsor :)
+      </p>
+      <div class="separator">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    </div>
+
+  </div>
 
 <script src="./script.js"></script>
 

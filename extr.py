@@ -66,6 +66,8 @@ def upload_flights_from_igc_links(igc_download_list, pilot_list, club_list):
     counter_for_bulk_upload = 0
     error_flights = 0
 
+    #skicka med ett id på index av igc_download_list + flight.termals listindex
+    #skapa id med en function create idstring typ...
     for i in igc_download_list:
         if counter_for_bulk_upload == 5:
             print "Uploading " + str(counter_for_bulk_upload) + " flights-worth to Elastic..."
