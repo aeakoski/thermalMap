@@ -53,7 +53,7 @@ properties:
 ------
 
 
-GET - http://127.0.0.1:9200/map/thermal
+POST - http://127.0.0.1:9200/map/thermal/_search
 
 {
 	"size":1000,
@@ -80,7 +80,7 @@ GET - http://127.0.0.1:9200/map/thermal
 							{
 								"match": {
 						        	"properties.pilot" : {
-						        	"query" : "stefan björnstam",
+						        	"query" : "björnstam stefan",
 						        	"operator" : "and"
 						        	}
 								}
@@ -95,8 +95,32 @@ GET - http://127.0.0.1:9200/map/thermal
 							}
 						]
 					}
+				},
+				{
+					"bool":{
+						"should":[
+							{
+								"match": {
+						        	"properties.club" : {
+						        	"query" : "gk",
+						        	"operator" : "and"
+						        	}
+								}
+							},
+							{
+								"match": {
+						        	"properties.club" : {
+						        	"query" : "fk",
+						        	"operator" : "and"
+						        	}
+								}
+							}
+						]
+					}
 				}
 			]
 		}
+
 	}
+
 }

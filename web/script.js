@@ -8,6 +8,13 @@ var map = new mapboxgl.Map({
     minZoom:8
 });
 
+var prev_upperLat = 0;
+var prev_lowerLat = 0;
+
+var prev_lowerLon = 0;
+var prev_upperLon = 0;
+
+
 pilotFilter = [];
 clubFilter = [];
 
@@ -88,7 +95,6 @@ var generateRequest = function(){
     });
   })
 
-
   return JSON.stringify(request);
 
 }
@@ -106,7 +112,16 @@ ll = [
     [3, 61]
 ]
 
-map.on('moveend', sendRequest);
+map.on('moveend', function(){
+  let lonlat = map.getBounds()
+  let epsilon = 0.000001
+  if(Math.abs(prev_upperLat - lonlat._ne.lat)<epsilon && Math.abs(prev_lowerLat - lonlat._sw.lat)<epsilon && Math.abs(prev_lowerLon - lonlat._sw.lng)<epsilon && Math.abs(prev_upperLon - lonlat._ne.lng)<epsilon){ return; }
+  prev_upperLat = lonlat._ne.lat;
+  prev_lowerLat = lonlat._sw.lat;
+  prev_lowerLon = lonlat._sw.lng;
+  prev_upperLon = lonlat._ne.lng;
+  sendRequest()
+});
 map.on('load', sendRequest)
 map.dragRotate.disable(); //Disables rotation
 
