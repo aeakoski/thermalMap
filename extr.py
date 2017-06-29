@@ -19,9 +19,6 @@ import math
 import json
 import requests
 from lxml import html
-# https://stackoverflow.com/questions/2018026/what-are-the-differences-between-the-urllib-urllib2-and-requests-module
-# Ersätt urllib2 med requests. Det är mkt snabbare!!!!
-import urllib2
 import re
 
 import igc_lib
@@ -53,12 +50,9 @@ def uploadThermalsToElastic(body):
     return 0
 
 def extract_data_from_url(url):
-    web = urllib2.urlopen(url)
-    data = web.read()
-    web.close()
+    web = requests.get(url)
 
-    tree = html.fromstring(data)
-
+    tree = html.fromstring(web.text)
     igc_download_list = tree.xpath("//tbody/tr/td/a[@title= 'Ladda ner IGC-fil']/@href")
     club_list = tree.xpath("//tbody/tr/td/a[@title= 'Visa klubbens samtliga resultat']/text()")
     pilot_list = tree.xpath("//tbody/tr/td/a[contains(@title, 'ttningens samtliga resultat')]/text()")
@@ -73,7 +67,6 @@ def upload_flights_from_igc_links(igc_download_list, pilot_list, club_list):
     error_flights = 0
 
     for i in igc_download_list:
-
         if counter_for_bulk_upload == 5:
             print "Uploading " + str(counter_for_bulk_upload) + " flights-worth to Elastic..."
             failedUploads += uploadThermalsToElastic(bulkReq)
@@ -81,9 +74,8 @@ def upload_flights_from_igc_links(igc_download_list, pilot_list, club_list):
             counter_for_bulk_upload = 0
 
         igcURL = "http://www.rst-online.se/" + i ##Link address to igc file
-        response = urllib2.urlopen(igcURL)
-
-        flight = igc_lib.Flight.create_from_str(response.read())
+        response = requests.get(igcURL)
+        flight = igc_lib.Flight.create_from_str(response.text)
 
         if not flight.valid:
             error_flights+=1
@@ -134,9 +126,6 @@ def main():
     print str(failed_uploads) + " - Errors in uploading packages to Elasticsearch"
 
     print "Klaar MFS!!!"
-
-
-
 
 
 if __name__ == "__main__":
