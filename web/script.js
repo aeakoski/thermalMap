@@ -10,7 +10,6 @@ var map = new mapboxgl.Map({
 
 var prev_upperLat = 0;
 var prev_lowerLat = 0;
-
 var prev_lowerLon = 0;
 var prev_upperLon = 0;
 
@@ -18,16 +17,6 @@ var prev_upperLon = 0;
 pilotFilter = [];
 clubFilter = [];
 
-var listToString = function(list){
-  if (list.length ==0) {
-    return "[]"
-  }
-  let string = "[ "
-  list.forEach(function(e){
-    string = string + "\"" + e +"\", "
-  })
-  return string.slice(0, -2)+"]";
-}
 
 var generateRequest = function(){
   lonlat = map.getBounds();
@@ -38,40 +27,40 @@ var generateRequest = function(){
   upperLon = lonlat._ne.lng;
 
   var request = {
-	"size":1000,
-	"query":{
-		"bool":{
-			"must":[
-				{
-					"geo_bounding_box":{
-						"geometry.coordinates":{
-							"top_left":{
-								"lat":upperLat,
-								"lon":lowerLon
-							},
-							"bottom_right":{
-								"lat":lowerLat,
-								"lon":upperLon
-							}
-						}
-					}
-				},
-				{
-					"bool":{
-						"should":[]
-					}
-				},
-        {
-					"bool":{
-						"should":[]
-					}
-				}
-			]
-		}
+  	"size":1000,
+  	"query":{
+  		"bool":{
+  			"must":[
+  				{
+  					"geo_bounding_box":{
+  						"geometry.coordinates":{
+  							"top_left":{
+  								"lat":upperLat,
+  								"lon":lowerLon
+  							},
+  							"bottom_right":{
+  								"lat":lowerLat,
+  								"lon":upperLon
+  							}
+  						}
+  					}
+  				},
+  				{
+  					"bool":{
+  						"should":[]
+  					}
+  				},
+          {
+  					"bool":{
+  						"should":[]
+  					}
+  				}
+  			]
+  		}
 
-	}
+  	}
 
-}
+  }
 
   pilotFilter.forEach(function(pilot){
     request.query.bool.must[1].bool.should.push({
@@ -105,6 +94,15 @@ var sendRequest = function(){
   xhr.send(data);
 }
 
+var sendCountRequest = function(){
+  xhr.open("GET", "http://127.0.0.1:9200/map/thermals/_count");
+  xhr.send({
+    "query" : {
+        "match_all" : {}
+    }
+});
+}
+
 ll = [
     [0, 0],
     [1, 15],
@@ -114,13 +112,14 @@ ll = [
 
 map.on('moveend', function(){
   let lonlat = map.getBounds()
-  let epsilon = 0.000001
+  let epsilon = 0.000001;
+  //Check if map has actually moved
   if(Math.abs(prev_upperLat - lonlat._ne.lat)<epsilon && Math.abs(prev_lowerLat - lonlat._sw.lat)<epsilon && Math.abs(prev_lowerLon - lonlat._sw.lng)<epsilon && Math.abs(prev_upperLon - lonlat._ne.lng)<epsilon){ return; }
-  prev_upperLat = lonlat._ne.lat;
-  prev_lowerLat = lonlat._sw.lat;
-  prev_lowerLon = lonlat._sw.lng;
-  prev_upperLon = lonlat._ne.lng;
-  sendRequest()
+    prev_upperLat = lonlat._ne.lat;
+    prev_lowerLat = lonlat._sw.lat;
+    prev_lowerLon = lonlat._sw.lng;
+    prev_upperLon = lonlat._ne.lng;
+    sendRequest()
 });
 map.on('load', sendRequest)
 map.dragRotate.disable(); //Disables rotation
@@ -132,7 +131,7 @@ var addPointsToMap = function(jsonThermals){
         map.removeSource("thermals");
       }
 
-      document.getElementById('nrt').innerHTML = "<i class=\"fa fa-cloud\" aria-hidden=\"true\"></i>: "+jsonThermals.features.length;
+      document.getElementById('nrt').innerHTML = jsonThermals.features.length;
 
       map.addSource("thermals", {
           type: "geojson",
@@ -184,22 +183,27 @@ var addPointsToMap = function(jsonThermals){
 }
 
 var xhr = new XMLHttpRequest();
-xhr.addEventListener("readystatechange", function () {
-  //Add 404 error handeling
-  if (this.readyState === 4) {
+xhr.addEventListener("readystatechange", function (e) {
 
-    let geolist = []
+  if (this.readyState == 4 && this.status == 200) {
 
-    var first = true;
-    JSON.parse(this.responseText).hits.hits.forEach(function(element){
-      if (first) {
-        //console.log(element._source);
-        first = false;
-      }
-      geolist.push(element._source);
-    });
+    if (this.responseURL === "http://127.0.0.1:9200/map/thermals/_search") {
+      let geolist = []
 
-    addPointsToMap({"features": geolist});
+      var first = true;
+      JSON.parse(this.responseText).hits.hits.forEach(function(element){
+        geolist.push(element._source);
+      });
+
+      addPointsToMap({"features": geolist});
+    } else if (this.responseURL === "http://127.0.0.1:9200/map/thermals/_count") {
+      console.log(JSON.parse(this.responseText).count);
+      document.getElementById('tot-nrt').innerHTML = "/ " + JSON.parse(this.responseText).count;
+
+
+    }else {
+      console.log(this.status + " - Error in making request to: " + this.responseURL);
+    }
   }
 });
 
@@ -211,9 +215,7 @@ var checkUserInput = function(inp){
 var addFilter = function(e, userInput, type){
   if (e.charCode != 13){ return; }
   if(!checkUserInput(userInput)){ return; }
-
   if (type === "pilot") {
-
     if (pilotFilter.indexOf(userInput) != -1) { return; }
     pilotFilter.push(userInput);
   }else if (type === "club"){
@@ -244,7 +246,6 @@ var removeFilter = function(filter, type){
 
 }
 
-
 var displayFilters = function () {
     var filters = document.getElementById('filter-results');
     filters.innerHTML = "";
@@ -266,3 +267,5 @@ var displayFilters = function () {
 
 
 }
+
+sendCountRequest()
