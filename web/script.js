@@ -5,8 +5,7 @@ var map = new mapboxgl.Map({
     center: [17.211814, 59.101584], //Vängsö
     zoom: 11,
     maxZoom:12,
-    minZoom:8,
-    cluster:true
+    minZoom:8
 });
 
 var prev_upperLat = 0;
@@ -104,11 +103,11 @@ var sendCountRequest = function(){
 });
 }
 
-ll = [
+var velStop = [
     [0, 0],
-    [1, 15],
-    [2, 40],
-    [3, 61]
+    [1, 20],
+    [2, 35],
+    [3, 40]
 ]
 
 map.on('moveend', function(){
@@ -139,7 +138,7 @@ var addPointsToMap = function(jsonThermals){
           data: jsonThermals,
           cluster: true,
           clusterMaxZoom: 9, // Max zoom to cluster points on
-          clusterRadius: 19 // Use small cluster radius for the heatmap look
+          clusterRadius: 15 // Use small cluster radius for the heatmap look
       });
 
 
@@ -149,11 +148,11 @@ var addPointsToMap = function(jsonThermals){
           "source": "thermals",
 
           "paint": {
-              "circle-color": 'rgba(100,0,0,0.1)',
+              "circle-color": 'rgba(229,36,62, 0.3)',
               "circle-radius": {
                 property: "velocity",
                 type: "exponential",
-                stops: ll
+                stops: velStop
               },
               "circle-blur": 1 // blur the circles to get a heatmap look
           },
@@ -168,18 +167,52 @@ var addPointsToMap = function(jsonThermals){
           "source": "thermals",
 
           "paint": {
-              "circle-color": 'rgba(200,0,0,0.5)',
+              "circle-color": 'rgba(229,36,62, 0.3)',
               "circle-radius": {
                 property: "velocity",
                 type: "exponential",
-                stops: ll
+                stops: velStop
               },
               "circle-blur": 1 // blur the circles to get a heatmap look
           },
           "filter": [">","velocity", 1]
-          //"filter": ["all",["==", "cluster", true],]
       }, 'waterway-label');
 
+      map.addLayer({
+        id: "c-thermals",
+        type: "circle",
+        source: "thermals",
+        filter: ["has", "point_count"],
+        paint: {
+            "circle-blur": 1.2,
+            "circle-color": {
+                property: "point_count",
+                type: "exponential",
+                stops: [
+                    [0, "rgba(229,36,62, 0.0)"],
+                    [5, "rgba(229,36,62, 0.22)"],
+                    [10, "rgba(198,27,49,0.24)"],
+                    [20, "rgba(198,27,49,0.26)"],
+                    [30, "rgba(198,27,49,0.28)"],
+                    [40, "rgba(198,27,49,0.30)"],
+                    [50, "rgba(198,27,49,0.30)"]
+                ]
+            },
+            "circle-radius": {
+                property: "point_count",
+                type: "exponential",
+                stops: [
+                  [0, 0],
+                  [5, 40],
+                  [10, 45],
+                  [20, 50],
+                  [30, 55],
+                  [40, 60],
+                  [50, 65]
+                ]
+            }
+        }
+    });
 
 }
 
