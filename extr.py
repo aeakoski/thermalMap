@@ -72,6 +72,10 @@ def extract_data_from_url(url):
 
     return igc_download_list, pilot_list, club_list
 
+def createIndex(dId, tNr):
+    zeros = 4-len(str(tNr))
+    return dId + zeros*"0"+str(tNr)
+
 def upload_flights_from_igc_links(igc_download_list, pilot_list, club_list):
 
     bulkReq = ""
@@ -84,6 +88,7 @@ def upload_flights_from_igc_links(igc_download_list, pilot_list, club_list):
     #skicka med ett id på index av igc_download_list + flight.termals listindex
     #skapa id med en function create idstring typ...
     for i in igc_download_list:
+        thermalCounter = 0
         if counter_for_bulk_upload == 5:
             print "Uploading " + str(counter_for_bulk_upload) + " flights-worth to Elastic..."
             failedUploads += uploadThermalsToElastic(bulkReq)
@@ -91,6 +96,8 @@ def upload_flights_from_igc_links(igc_download_list, pilot_list, club_list):
             counter_for_bulk_upload = 0
 
         igcURL = "http://www.rst-online.se/" + i ##Link address to igc file
+        flightID = i[19:]
+
         response = requests.get(igcURL)
         flight = igc_lib.Flight.create_from_str(response.text)
 
@@ -100,7 +107,7 @@ def upload_flights_from_igc_links(igc_download_list, pilot_list, club_list):
 
         ## Start-longitude, Start-latitude, Start-höjd, Slut-longitude, Slut-latitude, Slut-höjd, avg-hast, höjdvinst
         for t in flight.thermals:
-
+            thermalCounter+=1
             if 200 < t.alt_change():
                 #Prevents DivisionByZero Error
                 x, y, z = findThermalOnGround(t.enter_fix.lon, t.enter_fix.lat, t.enter_fix.gnss_alt, t.exit_fix.lon, t.exit_fix.lat, t.exit_fix.gnss_alt)
@@ -108,7 +115,7 @@ def upload_flights_from_igc_links(igc_download_list, pilot_list, club_list):
                 x, y = approxThermal(t.enter_fix.lon, t.enter_fix.lat, t.exit_fix.lon, t.exit_fix.lat)
 
             if 0 < t.vertical_velocity():
-                bulkReq = bulkReq + "{\"index\":{}}\n"
+                bulkReq = bulkReq + "{\"index\":{\"_id\":\"" + createIndex( flightID, thermalCounter) +"\"}}\n"
                 bulkReq = bulkReq + "{ \"type\" : \"Feature\" , \"properties\" : {\"velocity\":"+ str(t.vertical_velocity()) + ", \"pilot\": \"" + my_hash.hash_string(pilot_list[downloads].encode('utf8')).encode('utf8') + "\", \"club\": \"" + club_list[downloads].encode('utf8') + "\"}, \"geometry\":{\"type\":\"Point\", \"coordinates\": [ " + str(x) + ", " + str(y) + " ]}}\n"
                 #Atom slutar med syntax highlight på långa strängar...
 
@@ -117,6 +124,7 @@ def upload_flights_from_igc_links(igc_download_list, pilot_list, club_list):
 
         downloads +=1
         counter_for_bulk_upload +=1
+
     print "Uploading the last " + str(counter_for_bulk_upload) + " flights-worth to Elastic..."
     failedUploads += uploadThermalsToElastic(bulkReq)
 
@@ -126,13 +134,15 @@ def upload_flights_from_igc_links(igc_download_list, pilot_list, club_list):
 
 def main():
     links = ['2017.html', '2016.html']
+    links = ["http://www.rst-online.se/RSTmain.php?list=1&tab=0&class=1&crew=10066"]
     downloads = 0
     error_flights = 0
     failed_uploads = 0
 
     for link in links:
 
-        igc_download_list, pilot_list, club_list = extract_data_from_file(link)
+        #igc_download_list, pilot_list, club_list = extract_data_from_file(link)
+        igc_download_list, pilot_list, club_list = extract_data_from_url(link)
         d, e, f = upload_flights_from_igc_links(igc_download_list, pilot_list, club_list)
         downloads += d
         error_flights += e
