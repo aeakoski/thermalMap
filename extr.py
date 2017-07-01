@@ -22,6 +22,7 @@ from lxml import html
 import re
 
 import igc_lib
+import my_hash
 
 import fileinput
 
@@ -49,13 +50,25 @@ def uploadThermalsToElastic(body):
         return 1
     return 0
 
+def extract_data_from_file(filename):
+    with open(filename, 'r') as content_file:
+        content = content_file.read()
+
+
+    tree = html.fromstring(content)
+    igc_download_list = tree.xpath("//td/a[@title='Ladda ner IGC-fil']/@href")
+    club_list = tree.xpath("//td/a[@title='Visa klubbens samtliga resultat']/text()")
+    pilot_list = tree.xpath("//td/a[contains(@title, 'ttningens samtliga resultat')]/text()")
+
+    return igc_download_list, pilot_list, club_list
+
 def extract_data_from_url(url):
-    web = requests.get(url)
+    web = requests.post(url)
 
     tree = html.fromstring(web.text)
-    igc_download_list = tree.xpath("//tbody/tr/td/a[@title= 'Ladda ner IGC-fil']/@href")
-    club_list = tree.xpath("//tbody/tr/td/a[@title= 'Visa klubbens samtliga resultat']/text()")
-    pilot_list = tree.xpath("//tbody/tr/td/a[contains(@title, 'ttningens samtliga resultat')]/text()")
+    igc_download_list = tree.xpath("//td/a[@title='Ladda ner IGC-fil']/@href")
+    club_list = tree.xpath("//td/a[@title='Visa klubbens samtliga resultat']/text()")
+    pilot_list = tree.xpath("//td/a[contains(@title, 'ttningens samtliga resultat')]/text()")
 
     return igc_download_list, pilot_list, club_list
 
@@ -110,14 +123,14 @@ def upload_flights_from_igc_links(igc_download_list, pilot_list, club_list):
 
 
 def main():
-    links = ['http://www.rst-online.se/RSTmain.php?list=1&tab=0&class=1&crew=10168',
-            'http://www.rst-online.se/RSTmain.php?list=1&tab=0&class=1&crew=10161']
+    links = ['2017.html', '2016.html']
     downloads = 0
     error_flights = 0
     failed_uploads = 0
 
     for link in links:
-        igc_download_list, pilot_list, club_list = extract_data_from_url(link)
+
+        igc_download_list, pilot_list, club_list = extract_data_from_file(link)
         d, e, f = upload_flights_from_igc_links(igc_download_list, pilot_list, club_list)
         downloads += d
         error_flights += e

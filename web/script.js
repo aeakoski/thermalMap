@@ -14,7 +14,7 @@ var prev_lowerLon = 0;
 var prev_upperLon = 0;
 
 
-pilotFilter = ["Stefan"];
+pilotFilter = [];
 clubFilter = [];
 
 
