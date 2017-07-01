@@ -39,12 +39,20 @@ h1 {
 p {
 	color: #54534F;
 	font-family: 'Merriweather';
-	font-size: 1.2em;
+	font-size: 1.3em;
 	font-weight: 500;
 	line-height: 1.5em;
 	margin-bottom: 1em;
 }
 
+p img{
+  position: relative;
+  top: 0.6em;
+  margin-top: -0.5em;
+  height: 1.5em;
+  width: auto;
+
+}
 .container{
 
   position: absolute;
@@ -143,7 +151,7 @@ p {
 
 
 .filterbar {
-  
+
   font-family: 'PT Sans', sans-serif;
   text-align: center;
   background-color: #fff;
@@ -178,12 +186,28 @@ p {
 
 }
 
-
+.search-wrapper{
+  width: 100%;
+  text-align: center;
+}
 .search{
+  display: inline-block;
   padding-left: 0.4em;
   border: solid #cccccc 1px;
   box-shadow: inset 0 1px 1px rgba(0,0,0,0.075);
   border-radius: 7px;
+}
+
+.custom{
+  position: relative;;
+  top: 0.2em
+}
+
+.search-wrapper .search input{
+  font-size: 1em;
+  font-weight: 600;
+  height: 3em;
+  width: 30em;
 }
 
 #map {

@@ -73,11 +73,13 @@ def extract_data_from_url(url):
     return igc_download_list, pilot_list, club_list
 
 def upload_flights_from_igc_links(igc_download_list, pilot_list, club_list):
+
     bulkReq = ""
     downloads = 0
     failedUploads = 0
     counter_for_bulk_upload = 0
     error_flights = 0
+
 
     #skicka med ett id på index av igc_download_list + flight.termals listindex
     #skapa id med en function create idstring typ...
@@ -107,7 +109,7 @@ def upload_flights_from_igc_links(igc_download_list, pilot_list, club_list):
 
             if 0 < t.vertical_velocity():
                 bulkReq = bulkReq + "{\"index\":{}}\n"
-                bulkReq = bulkReq + "{ \"type\" : \"Feature\" , \"properties\" : {\"velocity\":"+ str(t.vertical_velocity()) + ", \"pilot\": \"" + pilot_list[downloads].encode('utf8') + "\", \"club\": \"" + club_list[downloads].encode('utf8') + "\"}, \"geometry\":{\"type\":\"Point\", \"coordinates\": [ " + str(x) + ", " + str(y) + " ]}}\n"
+                bulkReq = bulkReq + "{ \"type\" : \"Feature\" , \"properties\" : {\"velocity\":"+ str(t.vertical_velocity()) + ", \"pilot\": \"" + my_hash.hash_string(pilot_list[downloads].encode('utf8')).encode('utf8') + "\", \"club\": \"" + club_list[downloads].encode('utf8') + "\"}, \"geometry\":{\"type\":\"Point\", \"coordinates\": [ " + str(x) + ", " + str(y) + " ]}}\n"
                 #Atom slutar med syntax highlight på långa strängar...
 
                 #print "{\"index\":{}}"

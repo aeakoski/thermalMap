@@ -28,9 +28,6 @@
     <div class="filterbar">
       <div class="filter-section">
         <div class="search filter-toggle">
-          <i class="fa fa-search" aria-hidden="true"></i><input type="text" name="pilot" placeholder="Filtrera på pilot" value="" onkeypress="addFilter(event, value, 'pilot')">
-        </div>
-        <div class="search filter-toggle">
           <i class="fa fa-users" aria-hidden="true"></i><input type="text" name="club" placeholder="Filtrera på flygklubb" value="" onkeypress="addFilter(event, value, 'club')">
         </div>
         <div class ="filter-toggle"><i class="fa fa-cloud" aria-hidden="true"></i>: <span id="nrt">0</span></div>
@@ -48,11 +45,11 @@
       <div class="col">
         <h1>Vad är termik-kartan?</h1>
         <p>
-          Termik-kartan är ett litet hobbyprojekt av Alexander Koski, en segelflygare/student innom datateknik. Kartan hämtar flygningar från RST, som finns öppet för alla att hämta, och på kartan visualiserar termikblåsorna från dessa flygningar. Termikblårona som visas är de där piloten har stannat upp och kurvat med en positiv höjdvinst. Större medelstig i termikblåsan ger större diameter när termikblåsan målas upp på kartan.
+          Termik-kartan är ett litet hobbyprojekt av Alexander Koski, en segelflygare/student innom datateknik. Kartan hämtar flygningar från RST och på kartan här bakom målar upp termikblåsorna från dessa flygningar. Större medelstig i termikblåsan ger större diameter på kartan. Desto rödare område, desto fler termikblåsor finns i området.
         </p>
 
         <p>
-          Tanken med kartan är att kunna hitta ställen där det "alltid" stiger, för Big-data är kul.
+          Tanken med projektet är att kunna hitta ställen där det oftare stiger, och för att big-data är kul! ;)
         </p>
         <div class="separator">
           <span></span>
@@ -64,7 +61,7 @@
       <div class="col">
         <h1>Var kommer datan ifrån?</h1>
         <p>
-          All data hämtas från RST-online. Varje IGC fil har analyserats och från dessa har termikblåsorna där piloten stannat upp och kurvat med positiv hödjvinst målats upp på kartan. Totalt har <span id = tot-nrt></span> termikblåsor kunnat identifierats från flygningarna som ligger upe på RST, denna siffra ökar och mer data kommer finnas tillgänglig i takt med att nya flygningarladdas upp till tävlingen.
+          All data hämtas från <a href="http://www.rst-online.se">RST-online</a>. Varje IGC fil har analyserats och från dessa har termikblåsorna där piloten stannat upp och kurvat med positiv hödjvinst målats upp på kartan. Totalt har <span id = tot-nrt></span> termikblåsor kunnat identifierats från flygningarna som ligger uppe på RST, denna siffra ökar i takt med att nya flygningarladdas upp till tävlingen.
         </p>
 
         <div class="separator">
@@ -76,7 +73,7 @@
       <div class="col">
         <h1>Filter</h1>
         <p>
-          Det går att filtrera termikblåsorna som visas på kartan utefter flygklubb och utefter pilot (läs mer om att filtrera på Dina flygningar <a href="#">här</a>). Med dessa filter du kan se exakt var det är poppulärt att ligga och centrera termik jämfört med andra klubbar.
+          Det går att filtrera termikblåsorna som visas på kartan utefter flygklubb och utefter pilot (läs mer om att filtrera på just <i>Dina flygningar</i> <a href="#">här</a>). Med dessa filter du kan se exakt var det är poppulärt att ligga och centrera termik jämfört med andra klubbar.</p><p>
           Genom att lägga in flera filter är det möjligt att visa flera flygklubbars termikblåsor på kartan samtidigt. Observera att du måste skriva in flygklubbens namn så som den är representerad i RST för att filtret ska träda i kraft.
         </p>
         <div class="separator">
@@ -93,11 +90,27 @@
     <div class="container col-100">
       <h1>vill du se termikblåsor från dina flygningar?</h1>
       <p class ="ingress">
-        eller tycker termik-kartan är allmänt nice och vill visa uppskattning?
+        eller tycker termik-kartan är allmänt nice och vill visa uppskattning? <i class="fa fa-thumbs-o-up" aria-hidden="true"></i>
       </p>
       <p>
-        Det går att ordna. Om du visar din uppskattning genom att swicha motsvarande en glass (Tex en twister - 11 kr) till 0706-765 291 så drar jag i några spakar och justerar lite ventiler så får du tillbaka en hemlig kod för att kunna filtrera kartan på just dina termikblåsor :)
+        Det går att ordna. Eftersom Termik-kartan är ett hobbyprojekt av Alexander Koski, en segelflygare/student innom datateknik får du gärna visa din uppskattning genom att swicha motsvarande din favorit-glass (tex en Twister - 11 kr <a href="http://www.gb.se/produktgrupp/pinnarstrutar/"><img src="http://www.gb.se/wp-content/uploads/2016/03/twister-500x638.png" alt="" /></a>) till <b>0706-765 291</b> så drar jag i några spakar, justerar lite ventiler och skickar tillbaka en hemlig kod på 64 siffror och bokstäver till dig som du kopierar in här nedan för att se just dina flygningar på kartan.
       </p>
+
+      <p>
+        Du kommer fortfarade, med dina flygnaingar uppe, kunna filtrera ytterliggare på <i>flygklubb</i> och jämföra hur du flyger till skillnad från klubbar i närheten, spännande! :)
+      </p>
+      <div class="search-wrapper">
+        <div class="search filter-toggle">
+          <i class="fa fa-user fa-2x custom" aria-hidden="true"></i><input type="text" name="pilot" placeholder="Filtrera på pilot med din hemliga kod" value="" onkeypress="addFilter(event, value, 'pilot')">
+        </div>
+      </div>
+
+      <p>
+        Namnen på alla piloter kopplade till termikblåsorna lagras hashade (krypterade) i databasen för att värna om alla piloters personliga integritet och skyddar de piloter som inte vill vara sökbara för alla på Termik-kartan. Därav denna extra process för att filtrera ut dina flygnigar.
+      </p>
+
+
+
       <div class="separator">
         <span></span>
         <span></span>

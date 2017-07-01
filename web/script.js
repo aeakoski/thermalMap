@@ -5,7 +5,8 @@ var map = new mapboxgl.Map({
     center: [17.211814, 59.101584], //Vängsö
     zoom: 11,
     maxZoom:12,
-    minZoom:8
+    minZoom:8,
+    cluster:true
 });
 
 var prev_upperLat = 0;
@@ -238,7 +239,8 @@ var changeFocus = function(type){
 }
 
 var checkUserInput = function(inp){
-  if ((/^[a-zåäö\ ]+$/i.test(inp)) && (inp !== "") && (inp.length < 40)) { return true; }
+  if ((/^[a-z0-9]+$/i.test(inp)) && (inp !== "") && (inp.length < 65)) { return true; }
+  console.log("WRONG");
   return false;
 }
 
