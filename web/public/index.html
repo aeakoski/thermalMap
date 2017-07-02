@@ -73,7 +73,7 @@
       <div class="col">
         <h1>Filter</h1>
         <p>
-          Det går att filtrera termikblåsorna som visas på kartan utefter flygklubb och utefter pilot (läs mer om att filtrera på just <i>Dina flygningar</i> <a href="#">här</a>). Med dessa filter du kan se exakt var det är poppulärt att ligga och centrera termik jämfört med andra klubbar.</p><p>
+          Det går att filtrera termikblåsorna som visas på kartan utefter flygklubb och utefter pilot (läs mer om att filtrera på just <i>Dina flygningar</i> <a onclick="changeFocus(2)" href="#">här</a>). Med dessa filter du kan se exakt var det är poppulärt att ligga och centrera termik jämfört med andra klubbar.</p><p>
           Genom att lägga in flera filter är det möjligt att visa flera flygklubbars termikblåsor på kartan samtidigt. Observera att du måste skriva in flygklubbens namn så som den är representerad i RST för att filtret ska träda i kraft.
         </p>
         <div class="separator">
@@ -88,7 +88,7 @@
   </div>
   <div id="pilot-view" class ="view hide">
     <div class="container col-100">
-      <h1>vill du se termikblåsor från dina flygningar?</h1>
+      <h1>vill du se termiken från dina flygningar?</h1>
       <p class ="ingress">
         eller tycker termik-kartan är allmänt nice och vill visa uppskattning? <i class="fa fa-thumbs-o-up" aria-hidden="true"></i>
       </p>
@@ -101,7 +101,7 @@
       </p>
       <div class="search-wrapper">
         <div class="search filter-toggle">
-          <i class="fa fa-user fa-2x custom" aria-hidden="true"></i><input type="text" name="pilot" placeholder="Filtrera på pilot med din hemliga kod" value="" onkeypress="addFilter(event, value, 'pilot')">
+          <i class="fa fa-user fa-2x custom" aria-hidden="true"></i><input type="text" name="pilot" placeholder="Filtrera på pilot m. kod" value="" onkeypress="addFilter(event, value, 'pilot')">
         </div>
       </div>
 

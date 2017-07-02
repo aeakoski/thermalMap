@@ -148,7 +148,7 @@ var addPointsToMap = function(jsonThermals){
           "source": "thermals",
 
           "paint": {
-              "circle-color": 'rgba(229,36,62, 0.3)',
+              "circle-color": 'rgba(229,36,62, 0.4)',
               "circle-radius": {
                 property: "velocity",
                 type: "exponential",
@@ -167,7 +167,7 @@ var addPointsToMap = function(jsonThermals){
           "source": "thermals",
 
           "paint": {
-              "circle-color": 'rgba(229,36,62, 0.3)',
+              "circle-color": 'rgba(229,36,62, 0.5)',
               "circle-radius": {
                 property: "velocity",
                 type: "exponential",
@@ -272,7 +272,7 @@ var changeFocus = function(type){
 }
 
 var checkUserInput = function(inp){
-  if ((/^[a-z0-9]+$/i.test(inp)) && (inp !== "") && (inp.length < 65)) { return true; }
+  if ((/^[a-z0-9åäöÅÄÖ\ ]+$/i.test(inp)) && (inp !== "") && (inp.length < 65)) { return true; }
   console.log("WRONG");
   return false;
 }

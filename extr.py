@@ -59,7 +59,6 @@ def extract_data_from_file(filename):
     igc_download_list = tree.xpath("//td/a[@title='Ladda ner IGC-fil']/@href")
     club_list = tree.xpath("//td/a[@title='Visa klubbens samtliga resultat']/text()")
     pilot_list = tree.xpath("//td/a[contains(@title, 'ttningens samtliga resultat')]/text()")
-
     return igc_download_list, pilot_list, club_list
 
 def extract_data_from_url(url):
@@ -95,14 +94,20 @@ def upload_flights_from_igc_links(igc_download_list, pilot_list, club_list):
             bulkReq = ""
             counter_for_bulk_upload = 0
 
-        igcURL = "http://www.rst-online.se/" + i ##Link address to igc file
-        flightID = i[19:]
+        if i[0:4] == "http":
+            igcURL = i
+        else:
+            igcURL = "http://www.rst-online.se/" + i ##Link address to igc file
+
+        flightID = i[-4:]
 
         response = requests.get(igcURL)
         flight = igc_lib.Flight.create_from_str(response.text)
 
         if not flight.valid:
             error_flights+=1
+            with open("error-log.txt", "a") as errfile:
+                errfile.write(flightID + ", " + str(flight.notes)+"\n")
             continue
 
         ## Start-longitude, Start-latitude, Start-höjd, Slut-longitude, Slut-latitude, Slut-höjd, avg-hast, höjdvinst
@@ -133,16 +138,16 @@ def upload_flights_from_igc_links(igc_download_list, pilot_list, club_list):
 
 
 def main():
-    links = ['2017.html', '2016.html']
-    links = ["http://www.rst-online.se/RSTmain.php?list=1&tab=0&class=1&crew=10066"]
+    links = ['2016.html']
+    #links = ["http://www.rst-online.se/RSTmain.php?list=1&tab=0&class=1&crew=10066"]
     downloads = 0
     error_flights = 0
     failed_uploads = 0
 
     for link in links:
 
-        #igc_download_list, pilot_list, club_list = extract_data_from_file(link)
-        igc_download_list, pilot_list, club_list = extract_data_from_url(link)
+        igc_download_list, pilot_list, club_list = extract_data_from_file(link)
+        #igc_download_list, pilot_list, club_list = extract_data_from_url(link)
         d, e, f = upload_flights_from_igc_links(igc_download_list, pilot_list, club_list)
         downloads += d
         error_flights += e

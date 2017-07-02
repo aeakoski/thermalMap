@@ -1,7 +1,7 @@
 body {
   margin:0;
   padding:0;
-  font-size: 12pt;
+  font-size: 16pt;
   background-color: #C8E2AD;
   /*blue #75CFF0
   green #C8E2AD*/
@@ -14,12 +14,14 @@ input {
   margin: 0.1em 0.1em 0.2em 0.5em;
 }
 
+
+
 .ingress{
   color: #67BE9B;
 	font-family: 'PT Sans', sans-serif;
 	font-size: 1.2em;
 	font-weight: 700;
-	line-height: 1em;
+	line-height: 1.5em;
 
 	margin-bottom: 0.2em;
 	text-transform: uppercase;
@@ -28,7 +30,7 @@ input {
 h1 {
 	color: #67BE9B;
 	font-family: 'PT Sans', sans-serif;
-	font-size: 2.5em;
+	font-size: 2em;
 	font-weight: 400;
 	line-height: 1.5em;
 	letter-spacing: 0.2em;
@@ -39,7 +41,7 @@ h1 {
 p {
 	color: #54534F;
 	font-family: 'Merriweather';
-	font-size: 1.3em;
+	font-size: 1.2em;
 	font-weight: 500;
 	line-height: 1.5em;
 	margin-bottom: 1em;
@@ -54,7 +56,6 @@ p img{
 
 }
 .container{
-
   position: absolute;
   box-sizing: border-box;
   -webkit-box-sizing: border-box;
@@ -66,14 +67,19 @@ p img{
   margin-bottom: 5em;
   background-color: #ffffff;
   opacity:0.87;
+  text-align: center;
 }
 
 .col{
-  display: block;
-  padding-left: 2em;
-  padding-right: 2em;
-  width: 28%;
-  float: left;
+  display: inline-grid;
+  text-align: left;
+  padding-left: 1.5em;
+  padding-right: 1.5em;
+  width: 30%;
+  min-width: 400px;
+  box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
 }
 
 .col-100{
@@ -82,22 +88,10 @@ p img{
   padding-left: 2em;
   padding-right: 2em;
   min-width: 300px;
+  box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
 
-}
-
-
-.separator{
-  text-align: center;
-  margin-bottom: 3em;
-}
-
-.separator span{
-  margin: 5px;
-  display: inline-block;
-  width: 15px;
-  height:15px;
-  border-radius: 50%;
-  background-color: #67BE9B;
 }
 
 
@@ -119,9 +113,12 @@ p img{
   cursor:pointer;
   text-decoration: none;
   display: inline-block;
-  padding: 1em 2em 0.7em 2em;
-  margin: 0em 1em 0em 1em;
+  padding: 1em 2em 0.6em 2em;
+  margin: 0em 0.5em;
   background-color: #282c34;
+  box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
 }
 
 .navelement:hover {
@@ -136,9 +133,9 @@ p img{
   style:none;
   color: #fff;
   text-decoration: none;
-  letter-spacing: 5px;
+  letter-spacing: 0.2em;
   font-weight: 400;
-  font-size: 16pt;
+  font-size: 1em;
 }
 
 #active{
@@ -199,7 +196,7 @@ p img{
 }
 
 .custom{
-  position: relative;;
+  position: relative;
   top: 0.2em
 }
 
@@ -207,7 +204,7 @@ p img{
   font-size: 1em;
   font-weight: 600;
   height: 3em;
-  width: 30em;
+  width: inherit;
 }
 
 #map {
@@ -215,4 +212,20 @@ p img{
   position: absolute;
   width:100vw;
   height:87vh;
+}
+
+
+
+@media screen and (max-width: 699px){
+    body{
+      font-size:12pt;
+    }
+    .col{
+      width: inherit;
+    }
+    .container{
+      margin: 0;
+      width: 100%;
+    }
+    #navbar{padding: 0;}
 }
