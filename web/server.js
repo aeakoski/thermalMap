@@ -64,6 +64,10 @@ router.get('/', function(req, res) {
     res.json({ message: 'hooray! welcome to our api!' });
 });
 
+router.post('/thermals').post;
+
+
+
 // more routes for our API will happen here
 
 // REGISTER OUR ROUTES -------------------------------
