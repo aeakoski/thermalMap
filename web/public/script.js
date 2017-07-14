@@ -27,61 +27,28 @@ var generateRequest = function(){
   upperLon = lonlat._ne.lng;
 
   var request = {
-  	"size":1000,
-  	"query":{
-  		"bool":{
-  			"must":[
-  				{
-  					"geo_bounding_box":{
-  						"geometry.coordinates":{
-  							"top_left":{
-  								"lat":upperLat,
-  								"lon":lowerLon
-  							},
-  							"bottom_right":{
-  								"lat":lowerLat,
-  								"lon":upperLon
-  							}
-  						}
-  					}
-  				},
-  				{
-  					"bool":{
-  						"should":[]
-  					}
-  				},
-          {
-  					"bool":{
-  						"should":[]
-  					}
-  				}
-  			]
-  		}
-
-  	}
-
+          "geometry.coordinates":{
+            "top_left":{
+              "lat":upperLat,
+              "lon":lowerLon
+            },
+            "bottom_right":{
+              "lat":lowerLat,
+              "lon":upperLon
+            }
+          }
+          ,
+          "pilots":[]
+          ,
+          "clubs":[]
   }
 
   pilotFilter.forEach(function(pilot){
-    request.query.bool.must[1].bool.should.push({
-      "match": {
-            "properties.pilot" : {
-            "query" : pilot,
-            "operator" : "and"
-            }
-      }
-    });
+    request.pilots.push(pilot);
   })
 
   clubFilter.forEach(function(club){
-    request.query.bool.must[2].bool.should.push({
-      "match": {
-            "properties.club" : {
-            "query" : club,
-            "operator" : "and"
-            }
-      }
-    });
+    request.clubs.push(club);
   })
 
   return JSON.stringify(request);
@@ -90,17 +57,14 @@ var generateRequest = function(){
 
 var sendRequest = function(){
   data = generateRequest();
-  xhr.open("POST", "http://127.0.0.1:9200/map/thermals/_search");
+  xhr.open("POST", "http://127.0.0.1:8080/thermals/fetch");
+  xhr.setRequestHeader("content-type", "application/json");
   xhr.send(data);
 }
 
 var sendCountRequest = function(){
-  xhr.open("GET", "http://127.0.0.1:9200/map/thermals/_count");
-  xhr.send({
-    "query" : {
-        "match_all" : {}
-    }
-});
+  xhr.open("GET", "http://127.0.0.1:8080/thermals/count");
+  xhr.send();
 }
 
 var velStop = [
@@ -221,22 +185,23 @@ xhr.addEventListener("readystatechange", function (e) {
 
   if (this.readyState == 4 && this.status == 200) {
 
-    if (this.responseURL === "http://127.0.0.1:9200/map/thermals/_search") {
+    if (this.responseURL === "http://127.0.0.1:8080/thermals/fetch") {
       let geolist = []
-
       var first = true;
       JSON.parse(this.responseText).hits.hits.forEach(function(element){
         geolist.push(element._source);
       });
 
       addPointsToMap({"features": geolist});
-    } else if (this.responseURL === "http://127.0.0.1:9200/map/thermals/_count") {
+    } else if (this.responseURL === "http://127.0.0.1:8080/thermals/count") {
+
       console.log(JSON.parse(this.responseText).count);
       document.getElementById('tot-nrt').innerHTML = JSON.parse(this.responseText).count;
 
 
     }else {
       console.log(this.status + " - Error in making request to: " + this.responseURL);
+      console.log(this);
     }
   }
 });
