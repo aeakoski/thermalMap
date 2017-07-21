@@ -45,7 +45,7 @@ router.get('/', function(req, res) {
 app.post('/thermals/fetch', bodyParser.json(), function (req, res) {
 
   var options = { method: 'POST',
-    url: 'http://127.0.0.1:9200/map/thermals/_search',
+    url: 'http://localhost:9200/map/thermals/_search',
     headers: { 'content-type': 'application/json' },
     body: {
     	"size":1000,
@@ -111,7 +111,7 @@ app.post('/thermals/fetch', bodyParser.json(), function (req, res) {
 
 app.get('/thermals/count', function (req, res) {
   var options = { method: 'POST',
-    url: 'http://127.0.0.1:9200/map/thermals/_count',
+    url: 'http://localhost:9200/map/thermals/_count',
     headers: { 'content-type': 'application/json' },
     body: {query: { match_all: {} } },
     json: true };

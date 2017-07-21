@@ -41,7 +41,7 @@ def approxThermal(x1, y1, x2, y2):
 def uploadThermalsToElastic(body):
     if body == "":
         return 0
-    url = "http://127.0.0.1:9200/map/thermals/_bulk"
+    url = "http://localhost:9200/map/thermals/_bulk"
     response = requests.request("POST", url, data = body)
     jsonRes = json.loads(response.text)
     if jsonRes['errors']:
@@ -145,7 +145,7 @@ def main():
     failed_uploads = 0
 
     for link in links:
-
+        print "Köör nu mfss!!!"
         igc_download_list, pilot_list, club_list = extract_data_from_file(link)
         #igc_download_list, pilot_list, club_list = extract_data_from_url(link)
         d, e, f = upload_flights_from_igc_links(igc_download_list, pilot_list, club_list)
