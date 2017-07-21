@@ -135,6 +135,6 @@ app.use('/api', router);
 
 // START THE SERVER
 // =============================================================================
-app.listen(port, function () {
+app.listen(port, "188.226.153.225", function () {
   console.log('Example app listening on port '+ port)
 });
