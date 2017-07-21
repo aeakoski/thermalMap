@@ -42,7 +42,7 @@ def uploadThermalsToElastic(body):
     if body == "":
         return 0
     url = "http://localhost:9200/map/thermals/_bulk"
-    response = requests.request("POST", url, data = body)
+    response = requests.request("POST", url, body)
     jsonRes = json.loads(response.text)
     if jsonRes['errors']:
         print jsonRes
