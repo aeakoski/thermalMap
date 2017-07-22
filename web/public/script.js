@@ -194,7 +194,7 @@ xhr.addEventListener("readystatechange", function (e) {
 
       addPointsToMap({"features": geolist});
     } else if (this.responseURL.indexOf("thermals/count") !=- 1) {
-
+      console.log(JSON.parse(this.responseText));
       console.log(JSON.parse(this.responseText).count);
       document.getElementById('tot-nrt').innerHTML = JSON.parse(this.responseText).count;
 

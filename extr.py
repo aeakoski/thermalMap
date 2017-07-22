@@ -26,6 +26,9 @@ import my_hash
 
 import fileinput
 
+s = requests.session()
+s.keep_alive = False
+
 
 def findThermalOnGround(x1, y1, z1, x2, y2, z2):
     ##Approximates thermal origin on ground using standard linear algebra
@@ -62,7 +65,7 @@ def extract_data_from_file(filename):
     return igc_download_list, pilot_list, club_list
 
 def extract_data_from_url(url):
-    web = requests.post(url)
+    web = s.post(url)
 
     tree = html.fromstring(web.text)
     igc_download_list = tree.xpath("//td/a[@title='Ladda ner IGC-fil']/@href")
@@ -88,7 +91,7 @@ def upload_flights_from_igc_links(igc_download_list, pilot_list, club_list):
     #skapa id med en function create idstring typ...
     for i in igc_download_list:
         thermalCounter = 0
-        if counter_for_bulk_upload == 5:
+        if counter_for_bulk_upload == 20:
             print "Uploading " + str(counter_for_bulk_upload) + " flights-worth to Elastic..."
             failedUploads += uploadThermalsToElastic(bulkReq)
             bulkReq = ""
@@ -101,7 +104,7 @@ def upload_flights_from_igc_links(igc_download_list, pilot_list, club_list):
 
         flightID = i[-4:]
 
-        response = requests.get(igcURL)
+        response = s.get(igcURL)
         flight = igc_lib.Flight.create_from_str(response.text)
 
         if not flight.valid:
