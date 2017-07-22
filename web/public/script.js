@@ -57,13 +57,13 @@ var generateRequest = function(){
 
 var sendRequest = function(){
   data = generateRequest();
-  xhr.open("POST", "http://localhost:8080/thermals/fetch");
+  xhr.open("POST", "http://37.139.3.211:8080/thermals/fetch");
   xhr.setRequestHeader("content-type", "application/json");
   xhr.send(data);
 }
 
 var sendCountRequest = function(){
-  xhr.open("GET", "http://localhost:8080/thermals/count");
+  xhr.open("GET", "http://37.139.3.211:8080/thermals/count");
   xhr.send();
 }
 
