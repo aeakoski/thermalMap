@@ -12,7 +12,7 @@ app.use(bodyParser.json());
 app.use(express.static('public'))
 
 app.get('/', function (req, res) {
-  res.sendFile('index.html')
+  res.sendFile('./public/index.html')
   console.log("Send Index.html");
 })
 
@@ -26,6 +26,7 @@ var checkUserInput = function(inp){
 
 var port = 8080
 
+/*
 // ROUTES FOR OUR API
 // =============================================================================
 var router = express.Router();              // get an instance of the express Router
@@ -40,7 +41,7 @@ router.get('/', function(req, res) {
     console.log("vanlig sida");
     res.sendFile('index.html');
 });
-
+*/
 // POST method route
 app.post('/thermals/fetch', bodyParser.json(), function (req, res) {
 
@@ -131,7 +132,7 @@ app.get('/thermals/count', function (req, res) {
 // REGISTER OUR ROUTES -------------------------------
 // all of our routes will be prefixed with /api
 //TODO The above
-app.use('/api', router);
+//app.use('/api', router);
 
 // START THE SERVER
 // =============================================================================

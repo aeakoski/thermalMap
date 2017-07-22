@@ -57,13 +57,13 @@ var generateRequest = function(){
 
 var sendRequest = function(){
   data = generateRequest();
-  xhr.open("POST", "http://37.139.3.211:8080/thermals/fetch");
+  xhr.open("POST", "/thermals/fetch");
   xhr.setRequestHeader("content-type", "application/json");
   xhr.send(data);
 }
 
 var sendCountRequest = function(){
-  xhr.open("GET", "http://37.139.3.211:8080/thermals/count");
+  xhr.open("GET", "/thermals/count");
   xhr.send();
 }
 
@@ -185,7 +185,7 @@ xhr.addEventListener("readystatechange", function (e) {
 
   if (this.readyState == 4 && this.status == 200) {
 
-    if (this.responseURL === "http://127.0.0.1:8080/thermals/fetch") {
+    if (this.responseURL.indexOf("thermals/fetch") !=- 1) {
       let geolist = []
       var first = true;
       JSON.parse(this.responseText).hits.hits.forEach(function(element){
@@ -193,7 +193,7 @@ xhr.addEventListener("readystatechange", function (e) {
       });
 
       addPointsToMap({"features": geolist});
-    } else if (this.responseURL === "http://127.0.0.1:8080/thermals/count") {
+    } else if (this.responseURL.indexOf("thermals/count") !=- 1) {
 
       console.log(JSON.parse(this.responseText).count);
       document.getElementById('tot-nrt').innerHTML = JSON.parse(this.responseText).count;
