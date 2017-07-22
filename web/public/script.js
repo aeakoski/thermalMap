@@ -190,11 +190,11 @@ xhr.addEventListener("readystatechange", function (e) {
       var first = true;
       JSON.parse(this.responseText).hits.hits.forEach(function(element){
         geolist.push(element._source);
+        console.log(element._source);
       });
-
+      console.log(geolist);
       addPointsToMap({"features": geolist});
     } else if (this.responseURL.indexOf("thermals/count") !=- 1) {
-      console.log(JSON.parse(this.responseText));
       console.log(JSON.parse(this.responseText).count);
       document.getElementById('tot-nrt').innerHTML = JSON.parse(this.responseText).count;
 

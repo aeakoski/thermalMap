@@ -14,3 +14,5 @@ ne.se/downloadIgc.php?id=7906, ['Error: This file has 0 fixes, less than the min
 ne.se/downloadIgc.php?id=7866, ['Error: This file has 0 fixes, less than the minimum 50.']
 ne.se/downloadIgc.php?id=7839, ['Error: This file has 0 fixes, less than the minimum 50.']
 8139, ['Error: too many fixes intervals exceed time between fixes constraints. Allowed 10 fixes, found 14 fixes.']
+8139, ['Error: too many fixes intervals exceed time between fixes constraints. Allowed 10 fixes, found 14 fixes.']
+8139, ['Error: too many fixes intervals exceed time between fixes constraints. Allowed 10 fixes, found 14 fixes.']

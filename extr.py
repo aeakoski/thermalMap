@@ -29,6 +29,13 @@ import fileinput
 s = requests.session()
 s.keep_alive = False
 
+def whatisthis(s):
+    if isinstance(s, str):
+        print "ordinary string"
+    elif isinstance(s, unicode):
+        print "unicode string"
+    else:
+        print "not a string"
 
 def findThermalOnGround(x1, y1, z1, x2, y2, z2):
     ##Approximates thermal origin on ground using standard linear algebra
@@ -44,8 +51,8 @@ def approxThermal(x1, y1, x2, y2):
 def uploadThermalsToElastic(body):
     if body == "":
         return 0
-    url = "http://localhost:9200/map/thermals/_bulk"
-    response = requests.request("POST", url, data = body)
+    url = "http://37.139.3.211:9200/map/thermals/_bulk"
+    response = s.request("POST", url, data = body)
     jsonRes = json.loads(response.text)
     if jsonRes['errors']:
         print jsonRes
@@ -56,6 +63,7 @@ def uploadThermalsToElastic(body):
 def extract_data_from_file(filename):
     with open(filename, 'r') as content_file:
         content = content_file.read()
+        content = content.encode('utf-8')
 
 
     tree = html.fromstring(content)
@@ -78,10 +86,10 @@ def createIndex(dId, tNr):
     zeros = 4-len(str(tNr))
     return dId + zeros*"0"+str(tNr)
 
-def upload_flights_from_igc_links(igc_download_list, pilot_list, club_list):
+def upload_flights_from_igc_links(igc_download_list, pilot_list, club_list, startAt):
 
     bulkReq = ""
-    downloads = 0
+    downloads = startAt
     failedUploads = 0
     counter_for_bulk_upload = 0
     error_flights = 0
@@ -92,10 +100,13 @@ def upload_flights_from_igc_links(igc_download_list, pilot_list, club_list):
     for i in igc_download_list:
         thermalCounter = 0
         if counter_for_bulk_upload == 20:
-            print "Uploading " + str(counter_for_bulk_upload) + " flights-worth to Elastic..."
+            print "Uploading " + str(counter_for_bulk_upload) + " flights-worth to Elastic..." + str(downloads)+"/" + str(len(igc_download_list))
             failedUploads += uploadThermalsToElastic(bulkReq)
             bulkReq = ""
             counter_for_bulk_upload = 0
+            f = open("where.txt", "w")
+            f.write(str(downloads))
+            f.close()
 
         if i[0:4] == "http":
             igcURL = i
@@ -103,8 +114,20 @@ def upload_flights_from_igc_links(igc_download_list, pilot_list, club_list):
             igcURL = "http://www.rst-online.se/" + i ##Link address to igc file
 
         flightID = i[-4:]
+        #7607
+        if flightID == "7577":
+            #Division by zero error
+            continue
+        tries = 5
+        while tries != 0:
+            try:
+                response = s.get(igcURL)
+                tries  = 0
+                print flightID
+            except requests.exceptions.ConnectionError:
+                print "Connection Error till RSTs ervrar"
+                tries -= 1
 
-        response = s.get(igcURL)
         flight = igc_lib.Flight.create_from_str(response.text)
 
         if not flight.valid:
@@ -141,17 +164,21 @@ def upload_flights_from_igc_links(igc_download_list, pilot_list, club_list):
 
 
 def main():
-    links = ['2016.html']
+    links = ['klubb.html']
     #links = ["http://www.rst-online.se/RSTmain.php?list=1&tab=0&class=1&crew=10066"]
     downloads = 0
+    f = open("where.txt", "r")
+    startAt = int(f.readline().strip())
+    print startAt
+    f.close()
     error_flights = 0
     failed_uploads = 0
 
     for link in links:
-        print "Köör nu mfss!!!"
+        print link
         igc_download_list, pilot_list, club_list = extract_data_from_file(link)
         #igc_download_list, pilot_list, club_list = extract_data_from_url(link)
-        d, e, f = upload_flights_from_igc_links(igc_download_list, pilot_list, club_list)
+        d, e, f = upload_flights_from_igc_links(igc_download_list[startAt:], pilot_list, club_list, startAt)
         downloads += d
         error_flights += e
         failed_uploads += f
