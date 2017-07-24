@@ -41,15 +41,18 @@ router.get('/', function(req, res) {
     console.log("vanlig sida");
     res.sendFile('index.html');
 });
+
+3eb54a0048c7d5feccaeddb23b7e9c653a7963c9d29932c197fd76bd35aff22c
+b422878d6e6484274e24efb88720dc175dc20ab9e5fe89789b1983cd4eafb10e
 */
 // POST method route
 app.post('/thermals/fetch', bodyParser.json(), function (req, res) {
 
   var options = { method: 'POST',
-    url: 'http://localhost:9200/map/thermals/_search',
+    url: 'http://37.139.3.211:9200/map/thermals/_search',
     headers: { 'content-type': 'application/json' },
     body: {
-    	"size":1000,
+    	"size":10000,
     	"query":{
     		"bool":{
     			"must":[
@@ -112,7 +115,7 @@ app.post('/thermals/fetch', bodyParser.json(), function (req, res) {
 
 app.get('/thermals/count', function (req, res) {
   var options = { method: 'POST',
-    url: 'http://localhost:9200/map/thermals/_count',
+    url: 'http://37.139.3.211:9200/map/thermals/_count',
     headers: { 'content-type': 'application/json' },
     body: {query: { match_all: {} } },
     json: true };

@@ -3,7 +3,7 @@ var map = new mapboxgl.Map({
     container: 'map',
     style: 'mapbox://styles/aeakoski/cj4bd0ycx4cgx2sptdzigrgtl',
     center: [17.211814, 59.101584], //Vängsö
-    zoom: 11,
+    zoom: 11, //11 från början
     maxZoom:12,
     minZoom:8
 });
@@ -95,30 +95,32 @@ var addPointsToMap = function(jsonThermals){
         map.removeSource("thermals");
       }
 
+      // Display the number of thermals on the screen
       document.getElementById('nrt').innerHTML = jsonThermals.features.length;
 
       map.addSource("thermals", {
           type: "geojson",
           data: jsonThermals,
           cluster: true,
-          clusterMaxZoom: 9, // Max zoom to cluster points on
-          clusterRadius: 15 // Use small cluster radius for the heatmap look
+          clusterMaxZoom: 13, // Max zoom to cluster points on
+          clusterRadius: 5 // 15 Use small cluster radius for the heatmap look
       });
 
 
       map.addLayer({
+        //Map thermals with a vel smaller than 1 m/s
           "id": "cluster-1",
           "type": "circle",
           "source": "thermals",
 
           "paint": {
-              "circle-color": 'rgba(229,36,62, 0.4)',
+              "circle-color": 'rgba(229,36,62, 0.1)',
               "circle-radius": {
                 property: "velocity",
                 type: "exponential",
                 stops: velStop
               },
-              "circle-blur": 1 // blur the circles to get a heatmap look
+              "circle-blur": 1.5 // blur the circles to get a heatmap look
           },
           "filter": ["<","velocity", 1]
           //"filter": ["all",["==", "cluster", true],]
@@ -126,12 +128,13 @@ var addPointsToMap = function(jsonThermals){
 
 
       map.addLayer({
+        //Map thermals with a vel bigger than 1 m/s
           "id": "cluster-2",
           "type": "circle",
           "source": "thermals",
 
           "paint": {
-              "circle-color": 'rgba(229,36,62, 0.5)',
+              "circle-color": 'rgba(229,36,62, 0.2)',
               "circle-radius": {
                 property: "velocity",
                 type: "exponential",
@@ -142,24 +145,26 @@ var addPointsToMap = function(jsonThermals){
           "filter": [">","velocity", 1]
       }, 'waterway-label');
 
+
+
       map.addLayer({
         id: "c-thermals",
         type: "circle",
         source: "thermals",
         filter: ["has", "point_count"],
         paint: {
-            "circle-blur": 1.2,
+            "circle-blur": 17,//20
             "circle-color": {
                 property: "point_count",
                 type: "exponential",
                 stops: [
                     [0, "rgba(229,36,62, 0.0)"],
-                    [5, "rgba(229,36,62, 0.22)"],
-                    [10, "rgba(198,27,49,0.24)"],
-                    [20, "rgba(198,27,49,0.26)"],
-                    [30, "rgba(198,27,49,0.28)"],
-                    [40, "rgba(198,27,49,0.30)"],
-                    [50, "rgba(198,27,49,0.30)"]
+                    [5, "rgba(229,36,62, 0.6)"],
+                    [10, "rgba(198,27,49,0.6)"],
+                    [20, "rgba(198,27,49,0.6)"],
+                    [30, "rgba(198,27,49,0.6)"],
+                    [40, "rgba(198,27,49,0.6)"],
+                    [50, "rgba(198,27,49,0.6)"]
                 ]
             },
             "circle-radius": {
@@ -171,8 +176,8 @@ var addPointsToMap = function(jsonThermals){
                   [10, 45],
                   [20, 50],
                   [30, 55],
-                  [40, 60],
-                  [50, 65]
+                  [40, 55],
+                  [50, 55]
                 ]
             }
         }
@@ -190,12 +195,12 @@ xhr.addEventListener("readystatechange", function (e) {
       var first = true;
       JSON.parse(this.responseText).hits.hits.forEach(function(element){
         geolist.push(element._source);
-        console.log(element._source);
+        console.log(element._source.properties.club);
       });
-      console.log(geolist);
+      //console.log(geolist);
       addPointsToMap({"features": geolist});
     } else if (this.responseURL.indexOf("thermals/count") !=- 1) {
-      console.log(JSON.parse(this.responseText).count);
+      //console.log(JSON.parse(this.responseText).count);
       document.getElementById('tot-nrt').innerHTML = JSON.parse(this.responseText).count;
 
 

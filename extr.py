@@ -22,9 +22,12 @@ from lxml import html
 import re
 
 import igc_lib
-import my_hash
+import hash2
 
 import fileinput
+
+reload(sys)
+sys.setdefaultencoding("utf-8")
 
 s = requests.session()
 s.keep_alive = False
@@ -63,7 +66,6 @@ def uploadThermalsToElastic(body):
 def extract_data_from_file(filename):
     with open(filename, 'r') as content_file:
         content = content_file.read()
-        content = content.encode('utf-8')
 
 
     tree = html.fromstring(content)
@@ -114,10 +116,6 @@ def upload_flights_from_igc_links(igc_download_list, pilot_list, club_list, star
             igcURL = "http://www.rst-online.se/" + i ##Link address to igc file
 
         flightID = i[-4:]
-        #7607
-        if flightID == "7577":
-            #Division by zero error
-            continue
         tries = 5
         while tries != 0:
             try:
@@ -136,18 +134,23 @@ def upload_flights_from_igc_links(igc_download_list, pilot_list, club_list, star
                 errfile.write(flightID + ", " + str(flight.notes)+"\n")
             continue
 
+        print hash2.hasha(pilot_list[downloads].encode('utf8')).encode('utf8')
+        print pilot_list[downloads].encode('utf8')
         ## Start-longitude, Start-latitude, Start-höjd, Slut-longitude, Slut-latitude, Slut-höjd, avg-hast, höjdvinst
         for t in flight.thermals:
             thermalCounter+=1
             if 200 < t.alt_change():
-                #Prevents DivisionByZero Error
-                x, y, z = findThermalOnGround(t.enter_fix.lon, t.enter_fix.lat, t.enter_fix.gnss_alt, t.exit_fix.lon, t.exit_fix.lat, t.exit_fix.gnss_alt)
+                #Prevents bad aproximations
+                try:
+                    x, y, z = findThermalOnGround(t.enter_fix.lon, t.enter_fix.lat, t.enter_fix.gnss_alt, t.exit_fix.lon, t.exit_fix.lat, t.exit_fix.gnss_alt)
+                except ZeroDivisionError:
+                    x, y = approxThermal(t.enter_fix.lon, t.enter_fix.lat, t.exit_fix.lon, t.exit_fix.lat)
             else:
                 x, y = approxThermal(t.enter_fix.lon, t.enter_fix.lat, t.exit_fix.lon, t.exit_fix.lat)
 
             if 0 < t.vertical_velocity():
                 bulkReq = bulkReq + "{\"index\":{\"_id\":\"" + createIndex( flightID, thermalCounter) +"\"}}\n"
-                bulkReq = bulkReq + "{ \"type\" : \"Feature\" , \"properties\" : {\"velocity\":"+ str(t.vertical_velocity()) + ", \"pilot\": \"" + my_hash.hash_string(pilot_list[downloads].encode('utf8')).encode('utf8') + "\", \"club\": \"" + club_list[downloads].encode('utf8') + "\"}, \"geometry\":{\"type\":\"Point\", \"coordinates\": [ " + str(x) + ", " + str(y) + " ]}}\n"
+                bulkReq = bulkReq + "{ \"type\" : \"Feature\" , \"properties\" : {\"velocity\":"+ str(t.vertical_velocity()) + ", \"pilot\": \"" + hash2.hasha(pilot_list[downloads].encode('utf8')).encode('utf8') + "\", \"club\": \"" + club_list[downloads].encode('utf8') + "\"}, \"geometry\":{\"type\":\"Point\", \"coordinates\": [ " + str(x) + ", " + str(y) + " ]}}\n"
                 #Atom slutar med syntax highlight på långa strängar...
 
                 #print "{\"index\":{}}"
@@ -164,7 +167,7 @@ def upload_flights_from_igc_links(igc_download_list, pilot_list, club_list, star
 
 
 def main():
-    links = ['klubb.html']
+    links = ['2016.html']
     #links = ["http://www.rst-online.se/RSTmain.php?list=1&tab=0&class=1&crew=10066"]
     downloads = 0
     f = open("where.txt", "r")
