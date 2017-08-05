@@ -153,18 +153,18 @@ var addPointsToMap = function(jsonThermals){
         source: "thermals",
         filter: ["has", "point_count"],
         paint: {
-            "circle-blur": 17,//20
+            "circle-blur": 20,//20
             "circle-color": {
                 property: "point_count",
                 type: "exponential",
                 stops: [
                     [0, "rgba(229,36,62, 0.0)"],
                     [5, "rgba(229,36,62, 0.6)"],
-                    [10, "rgba(198,27,49,0.6)"],
-                    [20, "rgba(198,27,49,0.6)"],
-                    [30, "rgba(198,27,49,0.6)"],
-                    [40, "rgba(198,27,49,0.6)"],
-                    [50, "rgba(198,27,49,0.6)"]
+                    [10, "rgba(229,27,49,0.6)"],
+                    [20, "rgba(229,27,49,0.6)"],
+                    [30, "rgba(229,27,49,0.6)"],
+                    [40, "rgba(229,27,49,0.6)"],
+                    [50, "rgba(229,27,49,0.6)"]
                 ]
             },
             "circle-radius": {
@@ -172,12 +172,12 @@ var addPointsToMap = function(jsonThermals){
                 type: "exponential",
                 stops: [
                   [0, 0],
-                  [5, 40],
-                  [10, 45],
-                  [20, 50],
-                  [30, 55],
-                  [40, 55],
-                  [50, 55]
+                  [5, 50],
+                  [10, 55],
+                  [20, 60],
+                  [30, 65],
+                  [40, 75],
+                  [50, 85]
                 ]
             }
         }
