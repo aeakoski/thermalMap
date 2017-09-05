@@ -1,20 +1,17 @@
 const express = require('express');
 const app = express();
 const request = require("request");
+var path = require('path');
 var bodyParser = require('body-parser');
 
-// configure app to use bodyParser()
-// this will let us get the data from a POST
+var port = 8080
+
+// bodyParser will let us get data from a POST
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
-
+//Makes files in public dir accessable to the public
 app.use(express.static('public'))
-
-app.get('/', function (req, res) {
-  res.sendFile('./public/index.html')
-  console.log("Send Index.html");
-})
 
 var checkUserInput = function(inp){
   if ((/^[a-z0-9åäöÅÄÖ\ ]+$/i.test(inp)) && (inp !== "") && (inp.length < 65)) { return true; }
@@ -22,32 +19,12 @@ var checkUserInput = function(inp){
   return false;
 }
 
-//TODO add 404 handeling
+app.get('/', function (req, res) {
+  res.sendFile('./public/index.html')
+})
 
-var port = 8080
-
-/*
-// ROUTES FOR OUR API
-// =============================================================================
-var router = express.Router();              // get an instance of the express Router
-
-// middleware to use for all requests
-router.use(function(req, res) {
-    console.log('Something is happening.');
-});
-
-// test route to make sure everything is working (accessed at GET http://localhost:8080/api)
-router.get('/', function(req, res) {
-    console.log("vanlig sida");
-    res.sendFile('index.html');
-});
-
-3eb54a0048c7d5feccaeddb23b7e9c653a7963c9d29932c197fd76bd35aff22c
-b422878d6e6484274e24efb88720dc175dc20ab9e5fe89789b1983cd4eafb10e
-*/
-// POST method route
 app.post('/thermals/fetch', bodyParser.json(), function (req, res) {
-
+  //Prepare a request to Elastic in order to get the number of thermals in tha db
   var options = { method: 'POST',
     url: 'http://37.139.3.211:9200/map/thermals/_search',
     headers: { 'content-type': 'application/json' },
@@ -105,40 +82,56 @@ app.post('/thermals/fetch', bodyParser.json(), function (req, res) {
 
     });
 
+  //TODO Vad händer om elasticsearch är avstängt på servern?
   request(options, function (error, response, body) {
-    if (error) throw new Error(error);
+    if (error){
+      res.status(400);
+      res.json({ error: 'Not found' });
+    };
     res.status(200);
     res.send(body);
-
   });
 });
 
 app.get('/thermals/count', function (req, res) {
+  //Prepare a request to Elastic in order to get the number of thermals in tha db
   var options = { method: 'POST',
     url: 'http://37.139.3.211:9200/map/thermals/_count',
     headers: { 'content-type': 'application/json' },
     body: {query: { match_all: {} } },
     json: true };
 
+  //TODO Vad händer om elasticsearch är avstängt på servern?
   request(options, function (error, response, body) {
-    if (error) throw new Error(error);
+    if (error){
+      res.status(400);
+      res.json({ error: 'Not found' });
+    }
     res.status(200);
     res.send(body);
-
   });
 });
 
+// Error handlers
+app.use(function(req, res){
+  res.status(404);
 
+  res.format({
+    html: function () {
+      res.sendFile(path.join(__dirname +'/public/error404.html'));
+    },
+    json: function () {
+      res.json({ error: 'Not found' })
+    },
+    default: function () {
+      res.type('txt').send('Not found')
+    }
+  })
+});
 
-// more routes for our API will happen here
-
-// REGISTER OUR ROUTES -------------------------------
-// all of our routes will be prefixed with /api
-//TODO The above
-//app.use('/api', router);
 
 // START THE SERVER
 // =============================================================================
 app.listen(port, function () {
-  console.log('Example app listening on port '+ port)
+  console.log('Server listening on port '+ port)
 });

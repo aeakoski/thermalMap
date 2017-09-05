@@ -14,7 +14,15 @@ input {
   margin: 0.1em 0.1em 0.2em 0.5em;
 }
 
-
+hr{
+  border: 0;
+  height: 1px;
+  background: #777;
+  background-image: linear-gradient(to right, #ccc, #333, #ccc);
+  width: 80%;
+  margin-top: 3em;
+  margin-bottom: 2em;
+}
 
 .ingress{
   color: #67BE9B;
@@ -68,6 +76,29 @@ p img{
   background-color: #ffffff;
   opacity:0.87;
   text-align: center;
+}
+
+
+.button{
+  display: inline-block;
+  padding: 0.4em 1.5em;
+  margin: 1em;
+
+
+  border: solid #777 1px;
+  box-shadow: inset 0 1px 1px rgba(0,0,0,0.075);
+  border-radius: 7px;
+}
+
+.button p{
+  color: #67BE9B;
+	font-family: 'PT Sans', sans-serif;
+	font-size: 1.2em;
+	font-weight: 700;
+	line-height: 1.5em;
+
+
+	text-transform: uppercase;
 }
 
 .col{
@@ -182,6 +213,7 @@ p img{
   margin-right: 0.3em;
 
 }
+
 
 .search-wrapper{
   width: 100%;
