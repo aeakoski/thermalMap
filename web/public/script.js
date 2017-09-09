@@ -186,16 +186,12 @@ xhr.addEventListener("readystatechange", function (e) {
   if (this.readyState == 4 && this.status == 200) {
 
     if (this.responseURL.indexOf("thermals/fetch") !=- 1) {
-      let geolist = []
+      let geolist = JSON.parse(this.responseText).list;
       var first = true;
-      JSON.parse(this.responseText).hits.hits.forEach(function(element){
-        geolist.push(element._source);
-        console.log(element._source);
-      });
-      console.log(geolist);
+
       addPointsToMap({"features": geolist});
     } else if (this.responseURL.indexOf("thermals/count") !=- 1) {
-      console.log(JSON.parse(this.responseText).count);
+
       document.getElementById('tot-nrt').innerHTML = JSON.parse(this.responseText).count;
 
 

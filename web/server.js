@@ -88,8 +88,16 @@ app.post('/thermals/fetch', bodyParser.json(), function (req, res) {
       res.status(400);
       res.json({ error: 'Not found' });
     };
+
+    var responeJSON = {"list":[]}
+
+    body.hits.hits.forEach(function(element){
+      responeJSON.list.push({"properties": element._source.properties, "geometry":element._source.geometry});
+    });
+
+
     res.status(200);
-    res.send(body);
+    res.send(responeJSON);
   });
 });
 
