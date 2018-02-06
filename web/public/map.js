@@ -62,7 +62,7 @@ var getLocalThermalcount = function(){
   data = generateRequest();
   $.ajax({
     type: "POST",
-    url: "http://localhost:8080/thermals/countinbox",
+    url: "thermals/countinbox",
     data: data,
     success: countinboxHandeler,
     contentType:"application/json"
@@ -74,7 +74,7 @@ var getLocalThermals = function(){
   data = generateRequest();
   $.ajax({
     type: "POST",
-    url: "http://localhost:8080/thermals/fetch",
+    url: "thermals/fetch",
     data: data,
     success: getLocalThermalsHandeler,
     contentType:"application/json"
@@ -84,7 +84,7 @@ var getLocalThermals = function(){
 var getGlobalThermalCount = function(){
   $.ajax({
     type: "GET",
-    url: "http://localhost:8080/thermals/count",
+    url: "thermals/count",
     success: globalCountHandeler
   });
 }
