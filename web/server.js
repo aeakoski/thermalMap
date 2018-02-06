@@ -24,9 +24,90 @@ app.get('/', function (req, res) {
 })
 
 app.post('/thermals/fetch', bodyParser.json(), function (req, res) {
-  //Prepare a request to Elastic in order to get the number of thermals in tha db
+  //Prepare a request to Elastic in order to get the thermals in the db
   var options = { method: 'POST',
     url: 'http://37.139.3.211:9200/map/thermals/_search',
+    headers: { 'content-type': 'application/json' },
+    body: {
+    	"size":10000,
+    	"query":{
+    		"bool":{
+    			"must":[
+    				{
+    					"geo_bounding_box": {"geometry.coordinates": req.body['geometry.coordinates']}
+    				},
+    				{
+    					"bool":{
+    						"should":[]
+    					}
+    				},
+            {
+    					"bool":{
+    						"should":[]
+    					}
+    				}
+    			]
+    		}
+
+    	}
+
+    },
+    json: true };
+    console.log(typeof(req.body));
+    JSON.parse(req.body).pilots.forEach(function(pilot){
+      if (checkUserInput(pilot)) {
+        options.body.query.bool.must[1].bool.should.push({
+          "match": {
+                "properties.pilot" : {
+                "query" : pilot,
+                "operator" : "and"
+                }
+          }
+      });
+      }
+
+  });
+
+    req.body.clubs.forEach(function(club){
+      if (checkUserInput(club)) {
+        options.body.query.bool.must[2].bool.should.push({
+          "match": {
+                "properties.club" : {
+                "query" : club,
+                "operator" : "and"
+                }
+          }
+        });
+      }
+
+    });
+
+  //TODO Vad händer om elasticsearch är avstängt på servern?
+
+  request(options, function (error, response, body) {
+    if (error){
+      res.status(400);
+      res.json({ error: 'Not found' });
+    };
+
+    var responeJSON = {"list":[]}
+
+    body.hits.hits.forEach(function(element){
+      responeJSON.list.push({"properties": element._source.properties, "geometry":element._source.geometry});
+    });
+
+
+    res.status(200);
+    res.send(responeJSON);
+  });
+});
+
+app.post('/thermals/countinbox', bodyParser.json(), function (req, res) {
+  // Prepare a request to Elastic in order to get the number of thermals in the
+  // specified map box boundaries
+
+  var options = { method: 'POST',
+    url: 'http://37.139.3.211:9200/map/thermals/_count',
     headers: { 'content-type': 'application/json' },
     body: {
     	"size":10000,
@@ -83,23 +164,19 @@ app.post('/thermals/fetch', bodyParser.json(), function (req, res) {
     });
 
   //TODO Vad händer om elasticsearch är avstängt på servern?
+
   request(options, function (error, response, body) {
     if (error){
       res.status(400);
       res.json({ error: 'Not found' });
     };
-
-    var responeJSON = {"list":[]}
-
-    body.hits.hits.forEach(function(element){
-      responeJSON.list.push({"properties": element._source.properties, "geometry":element._source.geometry});
-    });
-
-
+    console.log(body);
     res.status(200);
-    res.send(responeJSON);
+    res.json(body);
+    console.log("Nu har jag skickt tillbaka stuff");
   });
 });
+
 
 app.get('/thermals/count', function (req, res) {
   //Prepare a request to Elastic in order to get the number of thermals in tha db
@@ -119,6 +196,7 @@ app.get('/thermals/count', function (req, res) {
     res.send(body);
   });
 });
+
 
 // Error handlers
 app.use(function(req, res){
