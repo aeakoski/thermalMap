@@ -13,6 +13,12 @@ var prev_lowerLat = 0;
 var prev_lowerLon = 0;
 var prev_upperLon = 0;
 
+var max_fetched_upperLat = 0;
+var max_fetched_lowerLat = 0;
+var max_fetched_lowerLon = 0;
+var max_fetched_upperLon = 0;
+
+var moves_since_last_fetch = 0;
 
 pilotFilter = [];
 clubFilter = [];
@@ -51,20 +57,65 @@ var generateRequest = function(){
     request.clubs.push(club);
   })
 
-  return JSON.stringify(request);
+  return request;
 
 }
 
-var sendRequest = function(){
+var getThermalcount = function(){
+  console.log("Sending countinbox request");
   data = generateRequest();
-  xhr.open("POST", "/thermals/fetch");
+
+  /*
+  xhr.open("POST", "/thermals/countinbox");
   xhr.setRequestHeader("content-type", "application/json");
   xhr.send(data);
+  */
+}
+
+var sendRequest = function(){
+  console.log("Sending fetch request");
+
+  data = generateRequest();
+  data = JSON.stringify(data);
+  console.log(data);
+  $.ajax({
+    type: "POST",
+    url: "http://localhost:8080/thermals/fetch",
+    data: data,
+    success: fetchHandeler,
+    contentType:"application/json"
+  });
+
+  /*xhr.open("POST", "/thermals/fetch");
+  xhr.setRequestHeader("content-type", "application/json");
+  xhr.send(data);*/
 }
 
 var sendCountRequest = function(){
   xhr.open("GET", "/thermals/count");
   xhr.send();
+}
+
+var fetchHandeler = function(data){
+  let geolist = data.list;
+  console.log(geolist);
+  var first = true;
+  addPointsToMap({"features": geolist});
+}
+
+var countHandeler = function(data){
+  //console.log("En vanlig count kom tillbaka");
+  document.getElementById('tot-nrt').innerHTML = JSON.parse(this.responseText).count;
+}
+
+var countinboxHandeler = function(data){
+  console.log("Fick svar av count!!!!");
+  let numberOfThermals = JSON.parse(this.responseText).count;
+  if (numberOfThermals == 10000) {
+    document.getElementById('nrt').innerHTML = "10000 (max)";
+  }else{
+    document.getElementById('nrt').innerHTML = numberOfThermals;
+  }
 }
 
 var velStop = [
@@ -79,7 +130,10 @@ map.on('moveend', function(){
   let epsilon = 0.000001;
   //Check if map has actually moved
   if(Math.abs(prev_upperLat - lonlat._ne.lat)<epsilon && Math.abs(prev_lowerLat - lonlat._sw.lat)<epsilon && Math.abs(prev_lowerLon - lonlat._sw.lng)<epsilon && Math.abs(prev_upperLon - lonlat._ne.lng)<epsilon){ return; }
-    if ((prev_upperLat >= lonlat._ne.lat) && (prev_lowerLat <= lonlat._sw.lat) && (prev_lowerLon <= lonlat._sw.lng) && (prev_upperLon >= lonlat._ne.lng)) {
+    moves_since_last_fetch++;
+    console.log("Vill ha thermal count");
+    getThermalcount();
+    if ((moves_since_last_fetch < 6) && (max_fetched_upperLat >= lonlat._ne.lat) && (max_fetched_lowerLat <= lonlat._sw.lat) && (max_fetched_lowerLon <= lonlat._sw.lng) && (max_fetched_upperLon >= lonlat._ne.lng)) {
       //We have zoomed in, no new fetch is neccesary
     }else {
         sendRequest()
@@ -94,12 +148,14 @@ map.on('load', sendRequest)
 map.dragRotate.disable(); //Disables rotation
 
 var addPointsToMap = function(jsonThermals){
+      moves_since_last_fetch = 0;
       if (map.getSource("thermals")) {
         map.removeLayer("cluster-1");
         map.removeLayer("cluster-2");
         map.removeSource("thermals");
       }
 
+      /*
       let numberOfThermals = jsonThermals.features.length;
 
       if (numberOfThermals == 10000) {
@@ -107,7 +163,7 @@ var addPointsToMap = function(jsonThermals){
       }else{
         document.getElementById('nrt').innerHTML = numberOfThermals;
       }
-
+      */
       // Display the number of thermals on the screen
 
       map.addSource("thermals", {
@@ -192,6 +248,13 @@ var addPointsToMap = function(jsonThermals){
         }
     });
 
+    //Update map points max_fetch_boundaries
+    let lonlat = map.getBounds();
+    max_fetched_upperLat = lonlat._ne.lat;
+    max_fetched_lowerLat = lonlat._sw.lat;
+    max_fetched_lowerLon = lonlat._sw.lng;
+    max_fetched_upperLon = lonlat._ne.lng;
+
 }
 
 var xhr = new XMLHttpRequest();
@@ -202,14 +265,22 @@ xhr.addEventListener("readystatechange", function (e) {
     if (this.responseURL.indexOf("thermals/fetch") !=- 1) {
       let geolist = JSON.parse(this.responseText).list;
       var first = true;
-
       addPointsToMap({"features": geolist});
-    } else if (this.responseURL.indexOf("thermals/count") !=- 1) {
 
+    } else if (this.responseURL.indexOf("thermals/count") !=- 1) {
+      console.log("En vanlig count kom tillbaka");
       document.getElementById('tot-nrt').innerHTML = JSON.parse(this.responseText).count;
 
-
-    }else {
+    }else if(this.responseURL.indexOf("thermals/countinbox") !=- 1){
+      console.log("Fick svar av count!!!!");
+      let numberOfThermals = JSON.parse(this.responseText).count;
+      if (numberOfThermals == 10000) {
+        document.getElementById('nrt').innerHTML = "10000 (max)";
+      }else{
+        document.getElementById('nrt').innerHTML = numberOfThermals;
+      }
+      //document.getElementById('nrt').innerHTML = JSON.parse(this.responseText).count;
+    } else {
       console.log(this.status + " - Error in making request to: " + this.responseURL);
       console.log(this);
     }
@@ -219,6 +290,7 @@ xhr.addEventListener("readystatechange", function (e) {
 var prev_focus = 0;
 
 var changeFocus = function(type){
+  //Changes focus between the different meny tabs
 
   document.getElementsByClassName("navelement")[0].removeAttribute("id");
   document.getElementsByClassName("navelement")[1].removeAttribute("id");
