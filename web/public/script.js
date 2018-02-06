@@ -57,21 +57,14 @@ var generateRequest = function(){
     request.clubs.push(club);
   })
 
-  return JSON.stringify(request);
+  return request;
 
 }
 
 var getThermalcount = function(){
   console.log("Sending countinbox request");
   data = generateRequest();
-  console.log(JSON.parse(data));
-  $.ajax({
-    type: "POST",
-    url: "http://localhost:8080/thermals/countinbox",
-    data: data,
-    success: countinboxHandeler(data),
-    dataType: "json"
-  });
+
   /*
   xhr.open("POST", "/thermals/countinbox");
   xhr.setRequestHeader("content-type", "application/json");
@@ -81,14 +74,16 @@ var getThermalcount = function(){
 
 var sendRequest = function(){
   console.log("Sending fetch request");
+
   data = generateRequest();
+  data = JSON.stringify(data);
   console.log(data);
   $.ajax({
     type: "POST",
     url: "http://localhost:8080/thermals/fetch",
     data: data,
     success: fetchHandeler,
-    dataType: "json"
+    contentType:"application/json"
   });
 
   /*xhr.open("POST", "/thermals/fetch");
@@ -102,7 +97,7 @@ var sendCountRequest = function(){
 }
 
 var fetchHandeler = function(data){
-  let geolist = JSON.parse(data);
+  let geolist = data.list;
   console.log(geolist);
   var first = true;
   addPointsToMap({"features": geolist});
