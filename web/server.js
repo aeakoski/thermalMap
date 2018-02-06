@@ -24,7 +24,6 @@ app.get('/', function (req, res) {
 })
 
 app.post('/thermals/fetch', bodyParser.json(), function (req, res) {
-  console.log("Got a fetch");
   //Prepare a request to Elastic in order to get the thermals in the db
   //console.log(req.body);
   var options = { method: 'POST',
@@ -56,7 +55,7 @@ app.post('/thermals/fetch', bodyParser.json(), function (req, res) {
     },
     json: true };
 
-    console.log(req.body);
+
     req.body.pilots.forEach(function(pilot){
       if (checkUserInput(pilot)) {
         options.body.query.bool.must[1].bool.should.push({
@@ -84,8 +83,6 @@ app.post('/thermals/fetch', bodyParser.json(), function (req, res) {
       }
 
     });
-
-    console.log("Klar med parseing");
 
   //TODO Vad händer om elasticsearch är avstängt på servern?
 
@@ -175,10 +172,8 @@ app.post('/thermals/countinbox', bodyParser.json(), function (req, res) {
       res.status(400);
       res.json({ error: 'Not found' });
     };
-    console.log(body);
     res.status(200);
     res.json(body);
-    console.log("Nu har jag skickt tillbaka stuff");
   });
 });
 
