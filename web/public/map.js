@@ -20,12 +20,23 @@ var max_fetched_upperLon = 0;
 
 var moves_since_last_fetch = 0;
 
-var generateRequest = function(){
+var generateRequest = function(offset){
   lonlat = map.getBounds();
-  upperLat = lonlat._ne.lat;
-  lowerLat = lonlat._sw.lat;
-  lowerLon = lonlat._sw.lng;
-  upperLon = lonlat._ne.lng;
+  upperLat = lonlat._ne.lat+offset;
+  lowerLat = lonlat._sw.lat-offset;
+  lowerLon = lonlat._sw.lng-offset;
+  upperLon = lonlat._ne.lng+offset;
+
+  if (offset != 0) {
+    max_fetched_upperLat = lonlat._ne.lat+offset;
+    max_fetched_lowerLat = lonlat._sw.lat-offset;
+    max_fetched_lowerLon = lonlat._sw.lng-offset;
+    max_fetched_upperLon = lonlat._ne.lng+offset;
+    console.log("!!!!! new prev");
+  }else{
+    console.log("no new prev");
+  }
+
 
   var request = {
           "geometry.coordinates":{
@@ -59,7 +70,7 @@ var generateRequest = function(){
 //--------------------------------------------//
 
 var getLocalThermalcount = function(){
-  data = generateRequest();
+  data = generateRequest(0);
   $.ajax({
     type: "POST",
     url: "thermals/countinbox",
@@ -71,7 +82,7 @@ var getLocalThermalcount = function(){
 
 var getLocalThermals = function(){
   getLocalThermalcount();
-  data = generateRequest();
+  data = generateRequest(0.3);
   $.ajax({
     type: "POST",
     url: "thermals/fetch",
@@ -134,7 +145,10 @@ map.on('moveend', function(){
     if ((moves_since_last_fetch < 6) && (max_fetched_upperLat >= lonlat._ne.lat) && (max_fetched_lowerLat <= lonlat._sw.lat) && (max_fetched_lowerLon <= lonlat._sw.lng) && (max_fetched_upperLon >= lonlat._ne.lng)) {
       //We have zoomed in, no new fetch is neccesary, but recalc of thermals is
       getLocalThermalcount();
+      console.log("NOPE");
     }else {
+      console.log( (max_fetched_lowerLon + " "+ lonlat._sw.lng));
+      console.log("YEP");
       moves_since_last_fetch = 0;
       getLocalThermals()
     }
@@ -232,12 +246,6 @@ var addPointsToMap = function(jsonThermals){
         }
     });
 
-    //Update map points max_fetch_boundaries
-    let lonlat = map.getBounds();
-    max_fetched_upperLat = lonlat._ne.lat;
-    max_fetched_lowerLat = lonlat._sw.lat;
-    max_fetched_lowerLon = lonlat._sw.lng;
-    max_fetched_upperLon = lonlat._ne.lng;
 
 }
 
