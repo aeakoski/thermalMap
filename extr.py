@@ -7,9 +7,6 @@ ls igcfiles | grep ".igc" -i | python extr.py | python tMap.py
 
 sudo /etc/init.d/elasticsearch start
 
-Nästa steg, anv. Linjär algebra för en linje i 3d och hitta vart den skär z = 0, dvs jordytan.
-Gör detta då termikblåsan har en höjdvinst på typ över 100-200 meter. Om ett för lågt värde tas kan apoximationen bli helt kaiko!
-
 
 """
 import itertools
@@ -80,8 +77,8 @@ def extract_data_from_file(filename):
     with open(filename, 'r') as content_file:
         content = content_file.read()
 
-    content = content.replace("<br>", "-") #Fixar buggen med attpilotlistan blir för stor pga tvåmannalag
-    content = content.replace("sterdalarn...", "sterdalarnas FK") #Fixar buggen med attpilotlistan blir för stor pga tvåmannalag
+    content = content.replace("<br>", "-") #Fixar buggen med att pilotlistan blir för stor pga tvåmannalag
+    content = content.replace("sterdalarn...", "sterdalarnas FK") #Fixar buggen med att pilotlistan blir för stor pga tvåmannalag
     content = content.replace("Hultsfed Se...", "Hultsfred Segelflygklubb") #Fixar buggen med attpilotlistan blir för stor pga tvåmannalag
 
     tree = html.fromstring(content)
@@ -142,7 +139,7 @@ def upload_flights_from_igc_links(igc_download_list, pilot_list, club_list, star
 
         flightID = i[-4:]
 
-        ## ------------------------------- FILTER ------------------------------ ##
+        ## ------------------------------- DEBUG-FILTER ------------------------------ ##
         """
         if club_list[downloads] != "Ö Sörmlands Fk":
             downloads+=1

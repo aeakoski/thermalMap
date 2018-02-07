@@ -1,5 +1,0 @@
-Ladda alltid in alla thermals som om det vore maxnivå. Detta gör att det
-går smidigare att navigera runt kartan
-
-Ladda in nästa max zoom set när användaren börjar närma sig kanten av boxen med mitten på skärmen
-
