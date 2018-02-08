@@ -5,6 +5,7 @@ var path = require('path');
 var bodyParser = require('body-parser');
 
 var port = 8080
+var elasticAddress = "http://127.0.0.1:9200" // http://37.139.3.211:9200
 
 // bodyParser will let us get data from a POST
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -27,7 +28,7 @@ app.post('/thermals/fetch', bodyParser.json(), function (req, res) {
   //Prepare a request to Elastic in order to get the thermals in the db
   //console.log(req.body);
   var options = { method: 'POST',
-    url: 'http://37.139.3.211:9200/map/thermals/_search',
+    url: elasticAddress + '/map/thermals/_search',
     headers: { 'content-type': 'application/json' },
     body: {
     	"size":10000,
@@ -109,7 +110,7 @@ app.post('/thermals/countinbox', bodyParser.json(), function (req, res) {
   // specified map box boundaries
 
   var options = { method: 'POST',
-    url: 'http://37.139.3.211:9200/map/thermals/_count',
+    url: elasticAddress + '/map/thermals/_count',
     headers: { 'content-type': 'application/json' },
     body: {
     	"size":10000,
@@ -181,7 +182,7 @@ app.post('/thermals/countinbox', bodyParser.json(), function (req, res) {
 app.get('/thermals/count', function (req, res) {
   //Prepare a request to Elastic in order to get the number of thermals in tha db
   var options = { method: 'POST',
-    url: 'http://37.139.3.211:9200/map/thermals/_count',
+    url: elasticAddress'/map/thermals/_count',
     headers: { 'content-type': 'application/json' },
     body: {query: { match_all: {} } },
     json: true };
