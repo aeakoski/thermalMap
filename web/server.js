@@ -182,7 +182,7 @@ app.post('/thermals/countinbox', bodyParser.json(), function (req, res) {
 app.get('/thermals/count', function (req, res) {
   //Prepare a request to Elastic in order to get the number of thermals in tha db
   var options = { method: 'POST',
-    url: elasticAddress'/map/thermals/_count',
+    url: elasticAddress+'/map/thermals/_count',
     headers: { 'content-type': 'application/json' },
     body: {query: { match_all: {} } },
     json: true };
