@@ -32,9 +32,6 @@ var generateRequest = function(offset){
     max_fetched_lowerLat = lonlat._sw.lat-offset;
     max_fetched_lowerLon = lonlat._sw.lng-offset;
     max_fetched_upperLon = lonlat._ne.lng+offset;
-    console.log("!!!!! new prev");
-  }else{
-    console.log("no new prev");
   }
 
 
@@ -145,10 +142,8 @@ map.on('moveend', function(){
     if ((moves_since_last_fetch < 6) && (max_fetched_upperLat >= lonlat._ne.lat) && (max_fetched_lowerLat <= lonlat._sw.lat) && (max_fetched_lowerLon <= lonlat._sw.lng) && (max_fetched_upperLon >= lonlat._ne.lng)) {
       //We have zoomed in, no new fetch is neccesary, but recalc of thermals is
       getLocalThermalcount();
-      console.log("NOPE");
     }else {
-      console.log( (max_fetched_lowerLon + " "+ lonlat._sw.lng));
-      console.log("YEP");
+      //console.log( (max_fetched_lowerLon + " "+ lonlat._sw.lng));
       moves_since_last_fetch = 0;
       getLocalThermals()
     }

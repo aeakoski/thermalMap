@@ -100,7 +100,6 @@ $(document).ready(function(){
     if(originalClublist[originalClublist.length-1] === ""){
       originalClublist.splice(-1,1)
     }
-    console.log(data.split(/\r?\n/));
     });
 });
 
