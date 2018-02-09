@@ -91,6 +91,7 @@ var addFilter = function(e, userInput, type){
   }else{ return; }
   getLocalThermals();
   displayFilters();
+  changeFocus(0);
   event.currentTarget.value = "";
 }
 var originalClublist = [];
