@@ -34,6 +34,8 @@ var checkUserInput = function(inp){
 
 var quicksuggest = function(suggest){
   $("#club-input").val(suggest);
+  $("#club-input").focus();
+  addFilter({code:suggest.slice(-1)}, suggest, 'club')
 
 }
 
