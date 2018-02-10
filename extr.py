@@ -204,10 +204,18 @@ def upload_flights_from_igc_links(igc_download_list, pilot_list, club_list, star
 
     return downloads, error_flights, failedUploads
 
+## 2012 ~1100
+## 2013 ~1700
+## 2014 1800
+## 2015 1300
+## 2016 1800
+## 2017
+
+##Signal App
 
 
 def main():
-    links = ['2014.html']
+    links = ['2017.html']
     #links = ["http://www.rst-online.se/RSTmain.php?list=1&tab=0&class=1&crew=10066"]
     downloads = 0
     f = open("where.txt", "r")

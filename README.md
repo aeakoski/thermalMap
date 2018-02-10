@@ -17,6 +17,10 @@ Live build at [termikkartan.se](http://termikkartan.se)
 ## IGC analysis
 I found a library to analyse igc files that return the info i would like to store in the db, such as position of the thermal and its vertical velocity. Credit to: XXX
 
+`extr.py` keeps track of the latest downloaded file by saving its current id to the file `where.txt`. So if python crashes, the program can start downloading files again where it left off
+
+`extr.py` uses linear algebra in 3 dimensions to figure out where the thermal has originated on the ground to account for the pilots drifting due to wind. It is theese coordinates that are stored in the db
+
 ## Database & Storage
 Elasticsearch database can only be accessed by server an only accepts connections from localhost.
 

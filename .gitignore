@@ -5,7 +5,8 @@ igcfiles/
 *.pyc
 igc_libs/
 
-2017.html
+
+[0-9][0-9][0-9][0-9].html
 
 web/node_modules
 my_hash.py
