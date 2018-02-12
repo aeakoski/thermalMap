@@ -38,7 +38,8 @@ PUT http://127.0.0.1:9200/map/
 ##### Mapping
 PUT http://127.0.0.1:9200/map/_mapping/thermals/
 
-```{
+```
+{
   "thermals":{
     "properties":{
       "properties":{
