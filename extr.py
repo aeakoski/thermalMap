@@ -16,6 +16,7 @@ import math
 import json
 import requests
 from lxml import html
+from lxml import etree
 import re
 
 import igc_lib
@@ -34,13 +35,13 @@ colisionTable = {}
 def checkColission(key, value):
     try:
         if value != colisionTable[key]:
-            print "\n\n\n\n\n\n\n-----\n\n\n\n\n\n"
+            print ("\n\n\n\n\n\n\n-----\n\n\n\n\n\n")
             raise ValueError("Colission: " + str(value) + " - " + str(colisionTable[key]))
         else:
-            print "Fanns redan: " + value + " - " + str(colisionTable[key])
-        print "No Collision"
+            print ("Fanns redan: " + value + " - " + str(colisionTable[key]))
+        print ("No Collision")
     except KeyError:
-        print "Lägger till pilot " + value
+        print ("Lägger till pilot " + value)
         colisionTable[key] = value
 
 def findThermalOnGround(x1, y1, z1, x2, y2, z2):
@@ -64,7 +65,7 @@ def uploadThermalsToElastic(body):
         response = s.request("POST", url, data = body)
         jsonRes = json.loads(response.text)
         if jsonRes['errors']:
-            print jsonRes
+            print (jsonRes)
             tries -= 1
         else:
             break
@@ -81,36 +82,42 @@ def extract_data_from_file(filename):
     content = content.replace("sterdalarn...", "sterdalarnas FK") #Fixar buggen med att pilotlistan blir för stor pga tvåmannalag
     content = content.replace("Hultsfed Se...", "Hultsfred Segelflygklubb") #Fixar buggen med attpilotlistan blir för stor pga tvåmannalag
 
-    tree = html.fromstring(content)
-    igc_download_list = tree.xpath("//td/a[@title='Ladda ner IGC-fil']/@href")
-    club_list = tree.xpath("//td/a[@title='Visa klubbens samtliga resultat']/text()")
-    pilot_list = tree.xpath("//td/a[contains(@title, 'ttningens samtliga resultat')]/text()")
+    tableTree = html.fromstring(content).xpath("//*[@id='listAllScores']")
+    tableString = html.tostring(tableTree[0])
 
-    print "Listornas längder:"
-    print len(igc_download_list)
-    print len(club_list)
-    print len(pilot_list)
-    print " ---------- "
-    if (len(igc_download_list) != len(club_list)) or (len(club_list) != len(pilot_list)):
-        print len(igc_download_list), len(club_list), len(pilot_list)
-        raise ValueError
-    return igc_download_list, pilot_list, club_list
+    tableHead = etree.HTML(tableString).find("body/table/thead")
+    tableBody = etree.HTML(tableString).find("body/table/tbody")
+    head = iter(tableHead)
+    rows = iter(tableBody)
 
-def extract_data_from_url(url):
-    web = s.post(url)
+    headers = ["datum", "pilot", "kommentar", "klass", "klubb", "hojd", "dist", "dpoang", "hast", "hpoang", "detaljer", "edit", "laddaner"]
 
-    tree = html.fromstring(web.text)
-    igc_download_list = tree.xpath("//td/a[@title='Ladda ner IGC-fil']/@href")
-    club_list = tree.xpath("//td/a[@title='Visa klubbens samtliga resultat']/text()")
-    pilot_list = tree.xpath("//td/a[contains(@title, 'ttningens samtliga resultat')]/text()")
+    tableListDict = []
+    for row in rows:
+        values = [
+        row[0].find("a").text,  # datum
+        row[1].find("a").text,  # pilot
+        row[2],                 # kommentar
+        row[3].text,            # klass
+        row[4].find("a").text,  # klubb
+        row[5].text,            #
+        row[6].text,            #
+        row[7].text,            #
+        row[8].text,            #
+        row[9].text,            #
+        row[10],                #
+        row[11],                #
+        row[12].find("a").attrib["href"] # ladda ner
+        ]
+        tableListDict.append(dict(zip(headers, values)))
 
-    return igc_download_list, pilot_list, club_list
+    return tableListDict
 
 def createIndex(dId, tNr):
     zeros = 4-len(str(tNr))
     return dId + zeros*"0"+str(tNr)
 
-def upload_flights_from_igc_links(igc_download_list, pilot_list, club_list, startAt):
+def upload_flights_from_igc_links(tableListDict, startAt):
 
     bulkReq = ""
     downloads = startAt
@@ -119,12 +126,12 @@ def upload_flights_from_igc_links(igc_download_list, pilot_list, club_list, star
     error_flights = 0
 
 
-    #skicka med ett id på index av igc_download_list + flight.termals listindex
-    #skapa id med en function create idstring typ...
-    for i in igc_download_list:
+    # Skicka med ett id på index av igc_download_list + flight.termals listindex
+    # Skapa id med en function create idstring typ...
+    for i in tableListDict:
         thermalCounter = 0
         if counter_for_bulk_upload == 20:
-            print "Uploading " + str(counter_for_bulk_upload) + " flights-worth to Elastic..." + str(downloads)+"/" + str(len(igc_download_list))
+            print ("Uploading " + str(counter_for_bulk_upload) + " flights-worth to Elastic..." + str(downloads)+"/" + str(len(igc_download_list)))
             failedUploads += uploadThermalsToElastic(bulkReq)
             bulkReq = ""
             counter_for_bulk_upload = 0
@@ -132,12 +139,12 @@ def upload_flights_from_igc_links(igc_download_list, pilot_list, club_list, star
             f.write(str(downloads))
             f.close()
 
-        if i[0:4] == "http":
-            igcURL = i
+        if i["laddaner"][0:4] == "http":
+            igcURL = i["laddaner"]
         else:
-            igcURL = "http://www.rst-online.se/" + i ##Link address to igc file
+            igcURL = "http://www.rst-online.se/" + i["laddaner"] ##Link address to igc file
 
-        flightID = i[-4:]
+        flightID = igcURL[-4:]
 
         ## ------------------------------- DEBUG-FILTER ------------------------------ ##
         """
@@ -153,9 +160,9 @@ def upload_flights_from_igc_links(igc_download_list, pilot_list, club_list, star
             try:
                 response = s.get(igcURL)
                 tries  = 0
-                print flightID
+                print (flightID)
             except requests.exceptions.ConnectionError:
-                print "Connection Error till RSTs ervrar"
+                print ("Connection Error till RSTs ervrar")
                 tries -= 1
 
         flight = igc_lib.Flight.create_from_str(response.text)
@@ -164,17 +171,19 @@ def upload_flights_from_igc_links(igc_download_list, pilot_list, club_list, star
             error_flights+=1
             with open("error-log.txt", "a") as errfile:
                 errfile.write(flightID + ", " + str(flight.notes)+"\n")
+            downloads+=1
             continue
+            # LOOKATME: Är det här det blev förskjutningsfel!!
 
 
-        print hash2.hasha(pilot_list[downloads].encode('utf8')).encode('utf8')
-        print pilot_list[downloads].encode('utf8')
-        print club_list[downloads].encode('utf8')
+        print (hash2.hasha(i["pilot"].encode('utf8')).encode('utf8'))
+        print (i["pilot"].encode('utf8'))
+        print (i["klubb"].encode('utf8'))
 
-        checkColission(hash2.hasha(pilot_list[downloads].encode('utf8')).encode('utf8'), pilot_list[downloads].encode('utf8'))
+        checkColission(hash2.hasha(i["pilot"].encode('utf8')).encode('utf8'), i["pilot"].encode('utf8'))
 
-        print " --- "
-        print "  "
+        print (" --- ")
+        print ("  ")
 
         ## Start-longitude, Start-latitude, Start-höjd, Slut-longitude, Slut-latitude, Slut-höjd, avg-hast, höjdvinst
         for t in flight.thermals:
@@ -190,61 +199,48 @@ def upload_flights_from_igc_links(igc_download_list, pilot_list, club_list, star
 
             if 0 < t.vertical_velocity():
                 bulkReq = bulkReq + "{\"index\":{\"_id\":\"" + createIndex( flightID, thermalCounter) +"\"}}\n"
-                bulkReq = bulkReq + "{ \"type\" : \"Feature\" , \"properties\" : {\"velocity\":"+ str(t.vertical_velocity()) + ", \"pilot\":\"" + hash2.hasha(pilot_list[downloads].encode('utf8')).encode('utf8') + "\", \"club\": \"" + club_list[downloads].encode('utf8') + "\"}, \"geometry\":{\"type\":\"Point\", \"coordinates\": [ " + str(x) + ", " + str(y) + " ]}}\n"
+                bulkReq = bulkReq + "{ \"type\" : \"Feature\" , \"properties\" : {\"velocity\":"+ str(t.vertical_velocity()) + ", \"pilot\":\"" + hash2.hasha(i["pilot"].encode('utf8')).encode('utf8') + "\", \"club\": \"" + i["klubb"].encode('utf8') + "\"}, \"geometry\":{\"type\":\"Point\", \"coordinates\": [ " + str(x) + ", " + str(y) + " ]}}\n"
                 #Atom slutar med syntax highlight på långa strängar...
-
-                #print "{\"index\":{}}"
-                #print json.dumps({ "type" : "Feature" , "properties" : {"velocity":t.vertical_velocity()}, "geometry":{"type":"Point", "coordinates": [x, y]}})
 
         downloads +=1
         counter_for_bulk_upload +=1
 
-    print "Uploading the last " + str(counter_for_bulk_upload) + " flights-worth to Elastic..."
+    print ("Uploading the last " + str(counter_for_bulk_upload) + " flights-worth to Elastic...")
     failedUploads += uploadThermalsToElastic(bulkReq)
 
     return downloads, error_flights, failedUploads
 
-## 2012 ~1100
-## 2013 ~1700
-## 2014 1800
-## 2015 1300
-## 2016 1800
-## 2017
-
-##Signal App
-
-
 def main():
-    links = ['2017.html']
+    links = ['2016.html', '2015.html', '2014.html', '2013.html', '2012.html']
     #links = ["http://www.rst-online.se/RSTmain.php?list=1&tab=0&class=1&crew=10066"]
     downloads = 0
     f = open("where.txt", "r")
     startAt = int(f.readline().strip())
-    print "Börjar hämta flygning nr "+ str(startAt)
+    print ("Börjar hämta flygning nr "+ str(startAt))
 
     f.close()
     error_flights = 0
     failed_uploads = 0
 
     for link in links:
-        print link
-        igc_download_list, pilot_list, club_list = extract_data_from_file(link)
-        #igc_download_list, pilot_list, club_list = extract_data_from_url(link)
-        d, e, f = upload_flights_from_igc_links(igc_download_list[startAt:], pilot_list, club_list, startAt)
+        print (link)
+        tableListDict = extract_data_from_file(link)
+        break
+        d, e, f = upload_flights_from_igc_links(tableListDict, startAt)
         downloads += d
         error_flights += e
         failed_uploads += f
-        print " ---------- "
+        print (" ---------- ")
 
-    print str(downloads) + " - Total IGC files fetched from RST"
-    print str(error_flights) + " - Errors in extracting thermals from flights"
-    print str(failed_uploads) + " - Errors in uploading packages to Elasticsearch"
+    print (str(downloads) + " - Total IGC files fetched from RST")
+    print (str(error_flights) + " - Errors in extracting thermals from flights")
+    print (str(failed_uploads) + " - Errors in uploading packages to Elasticsearch")
 
     f = open("where.txt", "w")
     f.write("0")
     f.close()
 
-    print "Klaar MFS!!!"
+    print ("Klaar MFS!!!")
 
 
 if __name__ == "__main__":
