@@ -75,7 +75,7 @@ def uploadThermalsToElastic(body):
         return 1
 
 def extract_data_from_file(filename):
-    with open(filename, 'r') as content_file:
+    with open("../thermalfiles/" + filename, 'r') as content_file:
         content = content_file.read()
 
     content = content.replace("<br>", "-") #Fixar buggen med att pilotlistan blir för stor pga tvåmannalag
@@ -110,7 +110,7 @@ def extract_data_from_file(filename):
         row[12].find("a").attrib["href"] # ladda ner
         ]
         tableListDict.append(dict(zip(headers, values)))
-
+    print(len(tableListDict))
     return tableListDict
 
 def createIndex(dId, tNr):
@@ -211,7 +211,7 @@ def upload_flights_from_igc_links(tableListDict, startAt):
     return downloads, error_flights, failedUploads
 
 def main():
-    links = ['2016.html', '2015.html', '2014.html', '2013.html', '2012.html']
+    links = ['2017.html']
     #links = ["http://www.rst-online.se/RSTmain.php?list=1&tab=0&class=1&crew=10066"]
     downloads = 0
     f = open("where.txt", "r")
