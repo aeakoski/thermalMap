@@ -225,7 +225,6 @@ def main():
     for link in links:
         print (link)
         tableListDict = extract_data_from_file(link)
-        break
         d, e, f = upload_flights_from_igc_links(tableListDict, startAt)
         downloads += d
         error_flights += e
