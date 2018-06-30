@@ -24,6 +24,8 @@ import hash2
 
 import fileinput
 
+from threading import Thread
+
 reload(sys)
 sys.setdefaultencoding("utf-8")
 
@@ -131,7 +133,7 @@ def upload_flights_from_igc_links(tableListDict, startAt):
     for i in tableListDict:
         thermalCounter = 0
         if counter_for_bulk_upload == 20:
-            print ("Uploading " + str(counter_for_bulk_upload) + " flights-worth to Elastic..." + str(downloads)+"/" + str(len(igc_download_list)))
+            print ("Uploading " + str(counter_for_bulk_upload) + " flights-worth to Elastic..." + str(downloads)+"/" + str(len(tableListDict)))
             failedUploads += uploadThermalsToElastic(bulkReq)
             bulkReq = ""
             counter_for_bulk_upload = 0
@@ -210,8 +212,29 @@ def upload_flights_from_igc_links(tableListDict, startAt):
 
     return downloads, error_flights, failedUploads
 
+def pipeline():
+    link = links[0]
+    del links[0]
+    print (link)
+    tableListDict = extract_data_from_file(link)
+    d, e, f = upload_flights_from_igc_links(tableListDict, 0)
+    downloads += d
+    error_flights += e
+    failed_uploads += f
+    print (" ---------- ")
+
+    print (str(downloads) + " - Total IGC files fetched from RST")
+    print (str(error_flights) + " - Errors in extracting thermals from flights")
+    print (str(failed_uploads) + " - Errors in uploading packages to Elasticsearch")
+
+class DownloadWorker(Thread):
+    def __init__(self):
+        Thread.__init__(self)
+    def run(self):
+        pipeline()
+
+links = ['2017.html', '2016.html', '2015.html', '2014.html', '2013.html', '2012.html']
 def main():
-    links = ['2017.html']
     #links = ["http://www.rst-online.se/RSTmain.php?list=1&tab=0&class=1&crew=10066"]
     downloads = 0
     f = open("where.txt", "r")
@@ -222,18 +245,10 @@ def main():
     error_flights = 0
     failed_uploads = 0
 
-    for link in links:
-        print (link)
-        tableListDict = extract_data_from_file(link)
-        d, e, f = upload_flights_from_igc_links(tableListDict, startAt)
-        downloads += d
-        error_flights += e
-        failed_uploads += f
-        print (" ---------- ")
-
-    print (str(downloads) + " - Total IGC files fetched from RST")
-    print (str(error_flights) + " - Errors in extracting thermals from flights")
-    print (str(failed_uploads) + " - Errors in uploading packages to Elasticsearch")
+    for link in range(6):
+        worker = DownloadWorker()
+        worker.deamon = True
+        worker.start()
 
     f = open("where.txt", "w")
     f.write("0")
