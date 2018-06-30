@@ -55,7 +55,7 @@
     <div class="filterbar">
       <div class="filter-section">
         <div class="search filter-toggle">
-          <!--<i class="fa fa-users" aria-hidden="true"></i>--><input type="text" id="club-input" name="club" placeholder="Filtrera på flygklubb" value="" onkeyup="addFilter(event, value, 'club')"><i class="fa fa-search" aria-hidden="true" onclick="mobileClubSearch()"></i>
+          <!--<i class="fa fa-users" aria-hidden="true"></i>--><input type="text" id="club-input" name="club" placeholder="Filtrera på flygklubb" value="" onkeyup="addFilter(event, value, 'club')"><i class="fa fa-search pointer" aria-hidden="true" onclick="clickToSearch('club')"></i>
 
           <div class="suggestions">
           </div>
@@ -131,7 +131,7 @@
       </p>
       <div class="search-wrapper">
         <div class="search filter-toggle">
-          <i class="fa fa-user fa-2x custom" aria-hidden="true"></i><input type="text" name="pilot" placeholder="Filtrera på pilot m. kod" value="" onkeypress="addFilter(event, value, 'pilot')">
+          <i class="fa fa-user fa-2x custom" aria-hidden="true"></i><input id="pilot-input" type="text" name="pilot" placeholder="Filtrera på pilot m. kod" value="" onkeypress="addFilter(event, value, 'pilot')"><i class="fa fa-search pointer" aria-hidden="true" onclick="clickToSearch('pilot')"></i>
         </div>
       </div>
 

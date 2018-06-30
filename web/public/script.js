@@ -32,8 +32,13 @@ var checkUserInput = function (inp) {
   return false
 }
 
-var mobileClubSearch = function(){
-  addFilter({code: 'Enter'}, $('#club-input').val(), 'club')
+var clickToSearch = function(type){
+  if (type === 'club') {
+    addFilter({code: 'Enter'}, $('#club-input').val(), 'club')
+  } else {
+    addFilter({code: 'Enter'}, $('#pilot-input').val(), 'pilot')
+  }
+
 }
 
 var quicksuggest = function (suggest) {

@@ -140,6 +140,10 @@ p img{
 
 }
 
+.pointer{
+  cursor: pointer;
+}
+
 .navelement {
   cursor:pointer;
   text-decoration: none;
@@ -178,8 +182,8 @@ p img{
 }
 
 
-.filterbar {
 
+.filterbar {
   font-family: 'PT Sans', sans-serif;
   text-align: center;
   background-color: #fff;
